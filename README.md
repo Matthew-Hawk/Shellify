@@ -10,7 +10,7 @@ Build scripts with guided commands, editable steps, and a live PowerShell previe
 [![Try the live demo](https://img.shields.io/badge/TRY_THE_LIVE_DEMO_%E2%86%97-46f2cb?style=for-the-badge&labelColor=111126)](https://shellify.thehawk6353.workers.dev/)
 
 **The best way to interact with Shellify is the [live demo ↗](https://shellify.thehawk6353.workers.dev/).**<br>
-Open it in your browser and start building—no account or installation needed.
+Open it in your browser and choose **Get started** to enter the dedicated builder—no account or installation needed.
 
 ![Shellify's dark workspace with a command catalog, script steps, and a live PowerShell preview](docs/screenshots/desktop-builder.png)
 
@@ -43,7 +43,7 @@ It uses **fourteen predefined templates and deterministic keyword matching**. It
 <details>
 <summary><strong>📱 Mobile preview</strong></summary>
 
-<p align="center"><img src="docs/screenshots/mobile-builder.png" alt="Shellify mobile layout with the hero and command catalog" width="330"></p>
+<p align="center"><img src="docs/screenshots/mobile-builder.png" alt="Shellify mobile Preview tab with word wrap and export controls" width="330"></p>
 
 </details>
 
@@ -70,12 +70,12 @@ Screenshots were captured from a local run of the repository.
 
 ### The useful details
 
-- **Live preview** with syntax highlighting and line numbers.
+- **Live preview** with syntax highlighting, line numbers, and toggleable word wrap. Wrap starts enabled; the browser remembers your preference without changing exported scripts.
 - **Editable, reorderable steps** with per-action requirements.
 - **Validation before export** for required fields, numeric bounds, and supported input types.
 - **Read-only and system-modifying labels** so the impact of an action is visible.
 - **Copy and `.ps1` download**, with UTF-8 BOM and Windows line endings on downloads.
-- **Desktop workspace that fits the viewport**, with independent scrolling for long catalogs, steps, and scripts. Mobile keeps a stacked layout.
+- **Desktop workspace that fits the viewport**, with independent scrolling for long catalogs, steps, and scripts. Phones and tablets use Discover, Configure, and Preview tabs, with one comfortable pane visible at a time.
 - **Subtle animated background**, a motion toggle, and support for reduced-motion preferences.
 - **Responsive dark interface** with mint and purple accents, keyboard focus styling, and reduced-motion support.
 - **No runtime libraries or backend**; Google Fonts are optional external assets with system fallbacks.
@@ -90,7 +90,7 @@ cd Shellify
 npm start
 ```
 
-Open **[http://127.0.0.1:4173](http://127.0.0.1:4173)**. Leave the terminal running while you use the app; press **Ctrl+C** to stop it.
+Open **[http://127.0.0.1:4173](http://127.0.0.1:4173)** and select **Get started**, or open `http://127.0.0.1:4173/builder.html` directly. Leave the terminal running while you use the app; press **Ctrl+C** to stop it.
 
 There are no package dependencies to install. If you prefer downloading a ZIP from GitHub, extract it, open a terminal in the folder containing `package.json`, and run `npm start`.
 
@@ -115,6 +115,7 @@ npm run build
 - Restarting a service is the only current system-modifying action. Confirmation is enabled by default. Remote restarts need configured PowerShell remoting and suitable permissions; interactive confirmation can behave differently remotely.
 - File actions list results; they do not delete files.
 - Validation and literal quoting help control generated syntax, but the browser cannot verify target-machine permissions, policies, connectivity, or installed modules.
+- Word wrap is a display preference stored locally when browser storage is available. Copied and downloaded scripts retain their original line breaks.
 - Refreshing the page resets your script to the initial disk-space step. Copy or download work you want to keep.
 
 Active Directory actions require the RSAT ActiveDirectory module, a reachable domain controller with AD Web Services, and directory read permissions. Generated scripts import the module once. Use Windows PowerShell 5.1 or PowerShell 7 with a compatible module. Optional server and search-base fields scope queries; inventories and account reports have result limits. Inactivity uses replicated logon information and may lag; review accounts before making changes. These templates have been syntax-tested, but have not been executed against a live domain.
@@ -125,7 +126,10 @@ Active Directory actions require the RSAT ActiveDirectory module, a reachable do
 
 | File / folder | Responsibility |
 | :--- | :--- |
-| `dist/index.html` | Page layout and the “How it works” guide |
+| `dist/index.html` | Landing page with the Get started entry point |
+| `dist/builder.html` | Dedicated responsive script builder and guide |
+| `dist/js/appearance.js` | Shared background motion and reduced-motion support |
+| `dist/js/landing.js` | Compatibility redirects for old builder bookmarks |
 | `dist/styles.css` | Dark theme, responsive layouts, and typography |
 | `dist/js/commands.js` | Action catalog, parameter schemas, requirements, and templates |
 | `dist/js/matcher.js` | Conservative keyword and alias matching |
