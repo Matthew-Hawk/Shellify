@@ -9,6 +9,13 @@ test('native PowerShell parser accepts templates and preserves hostile literals'
   const literals=["O'Brien",'x’; Write-Host injected; #','x‘; Write-Host injected; #','x‚; Write-Host injected; #','x‛; Write-Host injected; #','$(whoami)`; "quoted"','C:\\folder\\[test]'];
   const scripts=commands.map(c=>generateScript([{actionId:c.id,values:defaults(c)}]));
   scripts.push(generateScript([{actionId:'restart',values:{...defaults(commands.find(c=>c.id==='restart')),computer:"remote’host",service:"Spooler'; whoami #"}}]));
+  for(const action of commands.filter(c=>c.category==='Active Directory')){
+    for(const literal of literals){
+      const values=defaults(action);
+      for(const p of action.parameters.filter(p=>p.type==='text'))values[p.name]=literal;
+      scripts.push(generateScript([{actionId:action.id,values}]));
+    }
+  }
   const parser=`[Console]::InputEncoding = [Text.UTF8Encoding]::new($false)
   [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
   $data = [Console]::In.ReadToEnd() | ConvertFrom-Json

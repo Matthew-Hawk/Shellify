@@ -25,4 +25,13 @@ document.addEventListener('keydown',e=>{if(e.key==='/'&&!['INPUT','TEXTAREA','SE
 $('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(script);toast('Script copied to clipboard');}catch{toast('Clipboard unavailable. Select the preview text to copy it manually.');}});
 $('download').addEventListener('click',()=>{const blob=new Blob(['\ufeff'+script.replaceAll('\n','\r\n')],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='shellify-script.ps1';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('PowerShell script downloaded');});
 $('guide-button').addEventListener('click',()=>$('guide').showModal());$('close-guide').addEventListener('click',()=>$('guide').close());
-renderCategories();renderCatalog();renderSteps();
+$("catalog-count").textContent=commands.length;renderCategories();renderCatalog();renderSteps();
+
+
+// Respect the OS preference; the session toggle lets users pause ambient motion.
+const motionPreference=window.matchMedia('(prefers-reduced-motion: reduce)');
+let motionEnabled=!motionPreference.matches;
+function renderMotion(){document.body.classList.toggle('motion-paused',!motionEnabled);$('motion-toggle').setAttribute('aria-pressed',String(motionEnabled));$('motion-toggle').setAttribute('aria-label',motionEnabled?'Pause background motion':'Enable background motion');$('motion-toggle').textContent=motionEnabled?'◌ Motion on':'◌ Motion off';}
+$('motion-toggle').addEventListener('click',()=>{motionEnabled=!motionEnabled;renderMotion();});
+motionPreference.addEventListener('change',()=>{motionEnabled=!motionPreference.matches;renderMotion();});
+renderMotion();

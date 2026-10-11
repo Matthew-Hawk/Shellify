@@ -27,7 +27,7 @@ Open it in your browser and start building—no account or installation needed.
 
 Shellify makes common PowerShell tasks easier to assemble and understand. Find a supported action using a simple description, configure its fields, and watch the script take shape beside you.
 
-It uses **eight predefined templates and deterministic keyword matching**. It doesn't call an AI model, accept arbitrary code, or execute the generated script. Your work stays in the browser's memory until you copy or download it.
+It uses **fourteen predefined templates and deterministic keyword matching**. It doesn't call an AI model, accept arbitrary code, or execute the generated script. Your work stays in the browser's memory until you copy or download it.
 
 ## 01 / Find → configure → export
 
@@ -60,6 +60,12 @@ Screenshots were captured from a local run of the repository.
 | Restart a Windows service | `Get-Service`, `Restart-Service`, `Invoke-Command` | Restart an exact service name locally or remotely |
 | List files in a directory | `Get-ChildItem` | Files in a selected folder, optionally including subfolders |
 | Find older files | `Get-ChildItem`, `Where-Object` | Files older than a configured last-modified cutoff |
+| Get Active Directory user | `Get-ADUser` | Look up a user by exact identity |
+| List Active Directory computers | `Get-ADComputer` | Bounded domain computer inventory |
+| List Active Directory groups | `Get-ADGroup` | Bounded group inventory |
+| Get Active Directory group members | `Get-ADGroupMember` | Direct or nested group membership |
+| Find locked Active Directory users | `Search-ADAccount` | Report locked accounts |
+| Find inactive Active Directory users | `Search-ADAccount` | Report accounts with no recent directory logon |
 | Test network connectivity | `Test-Connection` | Ping a hostname or IP address |
 
 ### The useful details
@@ -69,6 +75,8 @@ Screenshots were captured from a local run of the repository.
 - **Validation before export** for required fields, numeric bounds, and supported input types.
 - **Read-only and system-modifying labels** so the impact of an action is visible.
 - **Copy and `.ps1` download**, with UTF-8 BOM and Windows line endings on downloads.
+- **Desktop workspace that fits the viewport**, with independent scrolling for long catalogs, steps, and scripts. Mobile keeps a stacked layout.
+- **Subtle animated background**, a motion toggle, and support for reduced-motion preferences.
 - **Responsive dark interface** with mint and purple accents, keyboard focus styling, and reduced-motion support.
 - **No runtime libraries or backend**; Google Fonts are optional external assets with system fallbacks.
 
@@ -108,6 +116,10 @@ npm run build
 - File actions list results; they do not delete files.
 - Validation and literal quoting help control generated syntax, but the browser cannot verify target-machine permissions, policies, connectivity, or installed modules.
 - Refreshing the page resets your script to the initial disk-space step. Copy or download work you want to keep.
+
+Active Directory actions require the RSAT ActiveDirectory module, a reachable domain controller with AD Web Services, and directory read permissions. Generated scripts import the module once. Use Windows PowerShell 5.1 or PowerShell 7 with a compatible module. Optional server and search-base fields scope queries; inventories and account reports have result limits. Inactivity uses replicated logon information and may lag; review accounts before making changes. These templates have been syntax-tested, but have not been executed against a live domain.
+
+[Active Directory module reference](https://learn.microsoft.com/en-us/powershell/module/activedirectory/).
 
 ## 05 / Under the hood
 
