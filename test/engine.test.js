@@ -44,7 +44,7 @@ test('combined flags stay on their target cmdlets and retain useful output',()=>
   assert.match(network.generate({...defaults(network),quiet:true}),/-Count 4 -Quiet -ErrorAction Stop$/);
   const restart=action('restart');
   const remote=restart.generate({...defaults(restart),computer:'server01',whatIf:true,force:true,passThru:true,verbose:true});
-  assert.match(remote,/Invoke-Command -ComputerName 'server01' -ScriptBlock \{/);
+  assert.match(remote,/Invoke-Command -ComputerName 'server01' -ArgumentList 'Spooler' -ScriptBlock \{/);
   assert.match(remote,/Restart-Service -WhatIf -Force -PassThru -Verbose -Confirm:\$true -ErrorAction Stop/);
   assert.equal(defaults(action('files')).recurse,false);
   assert.equal(defaults(files).recurse,true);

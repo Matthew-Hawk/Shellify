@@ -77,10 +77,13 @@ Screenshots were captured from a local run of the repository.
 ### The useful details
 
 - **Live preview** with syntax highlighting, line numbers, and toggleable word wrap. Wrap starts enabled; the browser remembers your preference without changing exported scripts.
+- **Guided and Expert output views.** Guided includes explanatory comments and numbered lines. Expert generates code without those comments, compacts ordinary pipelines, and hides line numbers. The selection applies to preview, clipboard, and `.ps1` downloads and is saved with the project. Expand output provides a full-width editor view on desktop.
 - **Editable, reorderable steps** with per-action requirements.
 - **Autosaved drafts** restore your steps, unfinished edits, collapsed cards, and export settings after a refresh. A status indicator reports when browser storage is unavailable. Start fresh opens an empty script.
 - **Duplicate, reset, collapse, and Undo** make long scripts easier to manage. Collapsed cards show targets, enabled flags, and validation errors. Undo remembers up to 50 changes during the current visit, including edits, removals, resets, and clearing or replacing a draft.
-- **Saved script library and starter workflows** under “Scripts & workflows.” Save up to 50 named scripts on this browser; open or delete them, with a restore option for the last deletion during the current visit. System health, folder review, and AD account review workflows append related steps together.
+- **Saved script library and starter workflows** under “Scripts & workflows.” Save up to 50 named scripts on this browser. Select an existing save destination to update it, rename entries, or restore their previous contents. Each entry keeps one previous version; renaming preserves that history. Open or delete entries, with a restore option for the last deletion during the current visit. System health, folder review, and AD account review workflows append related steps together.
+- **Shared inputs** let you define a host, folder, service name, or domain controller once, then link multiple text fields through their value-source selectors. Changes update every linked step. Values resolve to safely quoted literals in generated scripts; missing links prevent export.
+- **Bulk targets and error policies** live in each step’s Execution section. Supported hostname, service, and computer fields can accept up to 50 targets, one per line. The generated loop labels results by Target; CSV/JSON combine the step’s targets in one destination. Choose Stop the script or Record error and continue; continuation records warnings and error rows per failed target or step. Required module import failures always stop.
 - **Script settings** provide a title, description, Windows-safe download filename, and PowerShell 5.1 or 7 target. Metadata is exported as comments; ping uses the parameter name for the selected version. Current templates support both versions; AD still requires compatible RSAT modules.
 - **Flag-aware summaries** distinguish `-WhatIf` restart previews from actions that actually modify the system, both in the builder and exported comments.
 - **Editable project import/export** under “Scripts & workflows.” Share a `.shellify.json` file to move steps, flags, output settings, and metadata between devices. Imports validate the format, version, command catalog, and fields before replacing the draft; Undo restores the previous draft. Unfinished edits remain editable. Files are limited to 1 MB and 200 steps. Exported projects contain the targets and paths you entered. Try importing [the network review example](docs/examples/network-review.shellify.json).
@@ -108,7 +111,7 @@ npm start
 
 Open **[http://127.0.0.1:4173](http://127.0.0.1:4173)** and select **Get started**, or open `http://127.0.0.1:4173/builder.html` directly. Leave the terminal running while you use the app; press **Ctrl+C** to stop it.
 
-There are no package dependencies to install. If you prefer downloading a ZIP from GitHub, extract it, open a terminal in the folder containing `package.json`, and run `npm start`.
+The static application and `npm start` require no package installation. Development browser tests use Playwright: run `npm ci` to install test dependencies. If you prefer downloading a ZIP from GitHub, extract it, open a terminal in the folder containing `package.json`, and run `npm start`.
 
 Use a local server instead of opening `dist/index.html` directly: the app loads JavaScript modules, and clipboard access needs localhost or HTTPS plus browser permission.
 
@@ -119,7 +122,9 @@ npm test
 npm run build
 ```
 
-`npm test` covers generation, quoting, validation, ordering, and command matching. The native PowerShell parser test runs only on Windows with both Windows PowerShell and PowerShell 7 installed; it parses scripts without executing them.
+`npm test` covers generation, quoting, validation, ordering, command matching, project portability, library history, shared inputs, bulk execution, and Expert mode. The native PowerShell parser test runs only on Windows with both Windows PowerShell and PowerShell 7 installed; it parses scripts without executing them. A separate isolated mock-cmdlet test checks bulk failure handling without network requests or system actions.
+
+Run `npm run test:browser` after `npm ci` for automated desktop and mobile tests covering autosave, Undo, imports, favorites, library updates, shared inputs, bulk targets, output validation, clipboard, and downloads. Windows uses installed Microsoft Edge; other platforms use Playwright Chromium (`npx playwright install chromium`). Set `SHELLIFY_TEST_BROWSER=chrome` to use installed Chrome. The suite starts its own local server on port 4190 and blocks external page requests. These are development tools; the published app remains a static site.
 
 `npm run build` checks the static entry files in `dist/`. It does not compile or bundle the app.
 
@@ -132,7 +137,7 @@ npm run build
 - File actions list results; they do not delete files.
 - Validation and literal quoting help control generated syntax, but the browser cannot verify target-machine permissions, policies, connectivity, or installed modules.
 - Word wrap is a display preference stored locally when browser storage is available. Copied and downloaded scripts retain their original line breaks.
-- Refreshing the page resets your script to the initial disk-space step. Copy or download work you want to keep.
+- Refreshing restores your autosaved draft when browser storage is available. Project exports provide a portable backup independent of browser storage.
 
 Active Directory actions require the RSAT ActiveDirectory module, a reachable domain controller with AD Web Services, and directory read permissions. Generated scripts import the module once. Use Windows PowerShell 5.1 or PowerShell 7 with a compatible module. Optional server and search-base fields scope queries; inventories and account reports have result limits. Inactivity uses replicated logon information and may lag; review accounts before making changes. These templates have been syntax-tested, but have not been executed against a live domain.
 

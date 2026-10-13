@@ -8,6 +8,10 @@ import {generateScript} from '../dist/js/generator.js';
 test('native PowerShell parser accepts templates and preserves hostile literals', {skip:process.platform!=='win32'},()=>{
   const literals=["O'Brien",'x’; Write-Host injected; #','x‘; Write-Host injected; #','x‚; Write-Host injected; #','x‛; Write-Host injected; #','$(whoami)`; "quoted"','C:\\folder\\[test]'];
   const scripts=commands.map(c=>generateScript([{actionId:c.id,values:defaults(c)}]));
+  for(const id of ['network','restart','tcp-port'])for(const viewMode of ['guided','expert'])for(const onError of ['stop','continue']){
+    const c=commands.find(c=>c.id===id),values=defaults(c);if(id==='restart'){values.computer='server01';values.passThru=true;values.whatIf=true;}
+    scripts.push(generateScript([{actionId:id,values,onError,bulk:{field:id==='restart'?'service':'host',targets:["target'; whoami #",'second']},output:{format:id==='restart'?'none':'json',path:'results.json'}}],{viewMode}));
+  }
   scripts.push(generateScript(commands.map(c=>({actionId:c.id,values:defaults(c)})),{version:'7',title:'Title\nWrite-Host injected',description:'Notes\rSecond line\u2028Text'}));
   for(const action of commands.filter(c=>c.risk==='read'))for(const format of ['csv','json']){
     scripts.push(generateScript([{actionId:action.id,values:defaults(action),output:{format,path:`C:\\Reports\\O'Brien\\$(whoami).${format}`}}],{version:'7'}));

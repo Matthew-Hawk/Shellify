@@ -1,10 +1,11 @@
 import {commands} from './commands.js';
 import {restoreWorkspace,filenameFor,stepImpact} from './workspace.js';
-import {validate} from './validation.js';
+import {resolveStep,executionErrors,sharedInputErrors,bulkFields} from './execution.js';
 
 export const MAX_PROJECT_BYTES=1024*1024;
 export function exportProject(workspace){
-  return JSON.stringify({format:'shellify-project',schemaVersion:1,workspace:{...workspace,steps:workspace.steps.map(({actionId,values,collapsed,output})=>({actionId,values,collapsed,output}))}},null,2);
+  const {libraryId,...portable}=workspace;
+  return JSON.stringify({format:'shellify-project',schemaVersion:1,workspace:{...portable,steps:workspace.steps.map(({id,...step})=>step)}},null,2);
 }
 export const projectFilename=workspace=>filenameFor(workspace.filename).replace(/\.ps1$/i,'.shellify.json');
 export function importProject(source){
@@ -14,10 +15,20 @@ export function importProject(source){
   const data=project.workspace;
   if(!data||!['5.1','7'].includes(data.version)||!Array.isArray(data.steps)||data.steps.length>200)throw Error('Invalid project settings or step count.');
   for(const [key,max] of [['title',100],['description',1000],['filename',120]])if(typeof data[key]!=='string'||data[key].length>max)throw Error(`Invalid project ${key}.`);
+  if(data.viewMode!==undefined&&!['guided','expert'].includes(data.viewMode))throw Error('Invalid output view.');
+  if(sharedInputErrors(data.sharedInputs||[]).length)throw Error('Invalid shared inputs.');
   for(const item of data.steps){
     const action=commands.find(c=>c.id===item?.actionId);
     if(!action)throw Error('This project contains an unsupported command.');
     if(!item.values||typeof item.values!=='object'||Array.isArray(item.values))throw Error('Invalid project parameters.');
+    if(item.onError!==undefined&&!['stop','continue'].includes(item.onError))throw Error('Invalid error policy.');
+    if(item.bindings!==undefined){
+      if(!item.bindings||typeof item.bindings!=='object'||Array.isArray(item.bindings))throw Error('Invalid shared input links.');
+      for(const [name,id] of Object.entries(item.bindings))if(!action.parameters.some(p=>p.name===name&&p.type==='text')||typeof id!=='string'||id.length>100)throw Error('Invalid shared input link.');
+    }
+    if(item.bulk!==undefined){
+      if(!item.bulk||typeof item.bulk.field!=='string'||(item.bulk.field&&!bulkFields(action).some(p=>p.name===item.bulk.field))||!Array.isArray(item.bulk.targets)||item.bulk.targets.length>50||item.bulk.targets.some(t=>typeof t!=='string'||t.length>500))throw Error('Invalid bulk targets.');
+    }
     for(const [name,value] of Object.entries(item.values)){
       const p=action.parameters.find(p=>p.name===name);
       if(!p)throw Error(`Unsupported parameter: ${name}.`);
@@ -28,7 +39,7 @@ export function importProject(source){
       if(action.risk==='modify'&&item.output.format!=='none')throw Error('Result exports are available for read-only commands.');
     }
   }
-  return restoreWorkspace(data);
+  return restoreWorkspace({...data,libraryId:''});
 }
 
 export function outputErrors(action,output){
@@ -48,15 +59,16 @@ export function saveDiscovery(storage,data){try{storage.setItem(DISCOVERY_KEY,JS
 export function markRecent(discovery,id){return {...discovery,recent:[id,...discovery.recent.filter(item=>item!==id)].slice(0,8)};}
 
 export function reviewWorkspace(workspace){
-  const modules=new Set(),targets=new Set(),files=[],permissions=[],modifying=[],previews=[],errors=[];
+  const modules=new Set(),targets=new Set(),files=[],permissions=[],modifying=[],previews=[],errors=sharedInputErrors(workspace.sharedInputs||[]);
   const destinations=new Set();
   workspace.steps.forEach((step,index)=>{
     const a=commands.find(c=>c.id===step.actionId);if(!a){errors.push(`Step ${index+1}: unsupported command.`);return;}
     const label=`${index+1}. ${a.name}`;
     a.dependencies.forEach(module=>modules.add(module));
     permissions.push({label,requirements:a.requirements});
-    if(Object.keys(validate(a,step.values)).length||Object.keys(outputErrors(a,step.output)).length||!a.versions.includes(workspace.version))errors.push(`${label}: fix the step errors before exporting.`);
-    const v=step.values;
+    if(Object.keys(executionErrors(a,step,workspace.sharedInputs||[])).length||Object.keys(outputErrors(a,step.output)).length||!a.versions.includes(workspace.version))errors.push(`${label}: fix the step errors before exporting.`);
+    const v=resolveStep(step,workspace.sharedInputs||[]).values;
+    if(step.bulk?.field)step.bulk.targets.forEach(target=>targets.add(`Bulk ${step.bulk.field}: ${target}`));
     if(v.computer?.trim())targets.add(`Computer: ${v.computer}`);
     if(v.host?.trim())targets.add(`Network host: ${v.host}`);
     if(v.server?.trim())targets.add(`${a.category==='Active Directory'?'Domain controller':'DNS server'}: ${v.server}`);

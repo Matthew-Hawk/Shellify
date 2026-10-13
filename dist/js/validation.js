@@ -1,3 +1,5 @@
 // Values are always emitted as literal strings; never as executable fragments.
-export function quote(value){return "'"+String(value).replace(/['\u2018\u2019\u201a\u201b]/g,c=>c+c)+"'";}
+class PowerShellVariable{constructor(name){this.name=name;}toString(){return `$${this.name}`;}trim(){return this.toString();}}
+export function targetVariable(name){if(!/^ShellifyTarget\d+$/.test(name))throw Error('Invalid internal target variable.');return new PowerShellVariable(name);}
+export function quote(value){if(value instanceof PowerShellVariable)return value.toString();return "'"+String(value).replace(/['\u2018\u2019\u201a\u201b]/g,c=>c+c)+"'";}
 export function validate(action,values){const errors={};for(const p of action.parameters){const v=values[p.name];if(p.type==='boolean'){if(typeof v!=='boolean')errors[p.name]='Choose a valid option.';continue;}if(p.required && !String(v??'').trim()){errors[p.name]='This field is required.';continue;}if(p.type==='number' && (!/^\d+$/.test(String(v))||Number(v)<p.min||Number(v)>p.max))errors[p.name]=`Enter a whole number from ${p.min} to ${p.max}.`;if(p.type==='text' && (typeof v!=='string'||v.length>500||/[\x00-\x1f\x7f]/.test(v)))errors[p.name]='Use up to 500 characters without line breaks or control characters.';}return errors;}
