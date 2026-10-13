@@ -65,3 +65,10 @@ test('CSV validation disables export until a destination is set',async({page})=>
   await pane(page,'02 Configure');await page.getByRole('combobox',{name:'Output format',exact:true}).selectOption('csv');await pane(page,'03 Preview');await expect(page.getByRole('button',{name:/Download .ps1/})).toBeDisabled();
   await pane(page,'02 Configure');await page.getByRole('textbox',{name:/Destination path/}).fill('reports/disk.csv');await pane(page,'03 Preview');await expect(page.locator('#code')).toContainText('Export-Csv');await expect(page.getByRole('button',{name:/Download .ps1/})).toBeEnabled();
 });
+test('runtime settings persist, log validation blocks export and help is available',async({page})=>{
+  await page.getByRole('button',{name:'Script settings',exact:true}).click();
+  await page.locator('#preflight').check();await page.locator('#execution-summary').check();await page.locator('#logging-enabled').check();await expect(page.locator('#runtime-errors')).toContainText('log path');
+  await page.locator('#logging-path').fill('reports/run.log');await page.getByRole('button',{name:'Close script settings',exact:true}).click();await page.reload();await pane(page,'03 Preview');
+  await expect(page.locator('#code')).toContainText('Start-Transcript');await expect(page.locator('#code')).toContainText('Execution summary:');await expect(page.locator('#code')).toContainText('PSVersionTable');
+  await pane(page,'02 Configure');await page.getByText('Common problems & fixes',{exact:true}).click();await expect(page.locator('.troubleshooting')).toContainText('PowerShell version');
+});

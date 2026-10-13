@@ -13,7 +13,7 @@ export function createStep(actionId){
   if(!action)throw Error('Unsupported action.');
   return {id:crypto.randomUUID(),actionId,values:defaults(action),collapsed:false,output:{format:'none',path:''},bindings:{},bulk:{field:'',targets:[]},onError:'stop'};
 }
-export function freshWorkspace(){return {steps:[createStep('disk')],title:'',description:'',filename:'shellify-script.ps1',version:'5.1',sharedInputs:[],viewMode:'guided',libraryId:''};}
+export function freshWorkspace(){return {steps:[createStep('disk')],title:'',description:'',filename:'shellify-script.ps1',version:'5.1',sharedInputs:[],viewMode:'guided',libraryId:'',preflight:false,executionSummary:false,logging:{enabled:false,path:''}};}
 
 // Storage is untrusted. Keep only catalog fields and primitive values, including
 // unfinished edits so validation can explain them after a refresh.
@@ -36,7 +36,7 @@ export function restoreWorkspace(data){
   });
   const str=(name,max,fallback='')=>typeof data[name]==='string'?data[name].slice(0,max):fallback;
   const sharedInputs=Array.isArray(data.sharedInputs)?data.sharedInputs.slice(0,50).filter(i=>i&&typeof i.id==='string').map(i=>({id:i.id.slice(0,100),name:typeof i.name==='string'?i.name.slice(0,100):'',value:typeof i.value==='string'?i.value.slice(0,500):''})):[];
-  return {steps,title:str('title',100),description:str('description',1000),filename:str('filename',120,'shellify-script.ps1'),version:data.version==='7'?'7':'5.1',sharedInputs,viewMode:data.viewMode==='expert'?'expert':'guided',libraryId:str('libraryId',100)};
+  return {steps,title:str('title',100),description:str('description',1000),filename:str('filename',120,'shellify-script.ps1'),version:data.version==='7'?'7':'5.1',sharedInputs,viewMode:data.viewMode==='expert'?'expert':'guided',libraryId:str('libraryId',100),preflight:data.preflight===true,executionSummary:data.executionSummary===true,logging:{enabled:data.logging?.enabled===true,path:typeof data.logging?.path==='string'?data.logging.path.slice(0,500):''}};
 }
 export function readDraft(storage){
   try{const value=storage.getItem(DRAFT_KEY);return {workspace:value?restoreWorkspace(JSON.parse(value)):freshWorkspace(),restored:Boolean(value),error:false};}

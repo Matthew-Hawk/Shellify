@@ -90,6 +90,9 @@ Screenshots were captured from a local run of the repository.
 - **Favorites and recent commands** make discovery quicker. Star commands to keep them in Favorites; Recent shows the last eight commands added. Search also recognizes cmdlet names and applicable flag names, such as `files -Force` or `-DnsOnly`.
 - **Per-step CSV and JSON results** for read-only commands. Choose the output format and destination in the step’s Results section. Generated scripts write those files only when you run them, use UTF-8, and refuse to overwrite existing files. Destination folders must exist and be writable. JSON preserves an array even for zero or one result; quiet ping CSV output includes a Reachable column. Multiple steps must use separate destinations. CSV best suits flat fields; JSON preserves nested values.
 - **Script review** groups module imports, permission and compatibility notes, remote/network targets, modifying actions, preview-only actions, and result destinations before export.
+- **Optional run checks and reports** in Script settings. Preflight checks validate Windows, the selected PowerShell version, required modules, definite local administrator requirements, and destination folders before commands run. Remote permissions and folder write access are checked when the commands or file writes actually run. Execution summaries report successful command attempts and caught failures by step and target, including when a stopping error interrupts the script; they do not interpret returned connectivity or business results.
+- **Optional transcript logging** records console activity and errors to a selected new file. The log folder must exist and be writable; existing files are not overwritten, and transcripts stop in a finally block. Logs can contain targets, results, and other displayed data. Preflight, summaries, and logging settings travel with drafts and project files. These options start disabled to preserve compact output until selected.
+- **Command-specific troubleshooting** under each step’s “Common problems & fixes” covers paths, permissions, modules, service dependencies, DNS, firewall restrictions, and directory access.
 - **Command flag checkboxes** with PowerShell flag names and explanations. Toggle file recursion and hidden files, process owners, quiet ping results, nested AD membership, and service restart confirmation, dry runs, force, and returned status. Every action also offers `-Verbose`. The preview, copy, and download reflect your selections; existing recursion and confirmation defaults are preserved.
 - **Validation before export** for required fields, numeric bounds, and supported input types.
 - **Read-only and system-modifying labels** so the impact of an action is visible.
@@ -127,6 +130,8 @@ npm run build
 Run `npm run test:browser` after `npm ci` for automated desktop and mobile tests covering autosave, Undo, imports, favorites, library updates, shared inputs, bulk targets, output validation, clipboard, and downloads. Windows uses installed Microsoft Edge; other platforms use Playwright Chromium (`npx playwright install chromium`). Set `SHELLIFY_TEST_BROWSER=chrome` to use installed Chrome. The suite starts its own local server on port 4190 and blocks external page requests. These are development tools; the published app remains a static site.
 
 `npm run build` checks the static entry files in `dist/`. It does not compile or bundle the app.
+
+GitHub Actions runs the engine and native PowerShell tests, build check, and desktop/mobile browser suite on Windows for every push and pull request. The workflow can also be run manually from the repository’s Actions tab. It uses read-only repository permissions and a 15-minute job timeout.
 
 ## 04 / Know the boundaries
 

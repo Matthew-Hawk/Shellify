@@ -8,6 +8,7 @@ import {generateScript} from '../dist/js/generator.js';
 test('native PowerShell parser accepts templates and preserves hostile literals', {skip:process.platform!=='win32'},()=>{
   const literals=["O'Brien",'x’; Write-Host injected; #','x‘; Write-Host injected; #','x‚; Write-Host injected; #','x‛; Write-Host injected; #','$(whoami)`; "quoted"','C:\\folder\\[test]'];
   const scripts=commands.map(c=>generateScript([{actionId:c.id,values:defaults(c)}]));
+  for(const viewMode of ['guided','expert'])for(const version of ['5.1','7'])scripts.push(generateScript(commands.map(c=>({actionId:c.id,values:defaults(c)})),{viewMode,version,preflight:true,executionSummary:true,logging:{enabled:true,path:"logs/O'Brien.log"}}));
   for(const id of ['network','restart','tcp-port'])for(const viewMode of ['guided','expert'])for(const onError of ['stop','continue']){
     const c=commands.find(c=>c.id===id),values=defaults(c);if(id==='restart'){values.computer='server01';values.passThru=true;values.whatIf=true;}
     scripts.push(generateScript([{actionId:id,values,onError,bulk:{field:id==='restart'?'service':'host',targets:["target'; whoami #",'second']},output:{format:id==='restart'?'none':'json',path:'results.json'}}],{viewMode}));

@@ -1,4 +1,5 @@
 import {commands} from './commands.js';
+import {runtimeErrors} from './runtime.js';
 import {restoreWorkspace,filenameFor,stepImpact} from './workspace.js';
 import {resolveStep,executionErrors,sharedInputErrors,bulkFields} from './execution.js';
 
@@ -16,6 +17,8 @@ export function importProject(source){
   if(!data||!['5.1','7'].includes(data.version)||!Array.isArray(data.steps)||data.steps.length>200)throw Error('Invalid project settings or step count.');
   for(const [key,max] of [['title',100],['description',1000],['filename',120]])if(typeof data[key]!=='string'||data[key].length>max)throw Error(`Invalid project ${key}.`);
   if(data.viewMode!==undefined&&!['guided','expert'].includes(data.viewMode))throw Error('Invalid output view.');
+  for(const key of ['preflight','executionSummary'])if(data[key]!==undefined&&typeof data[key]!=='boolean')throw Error('Invalid runtime options.');
+  if(data.logging!==undefined&&(!data.logging||typeof data.logging.enabled!=='boolean'||typeof data.logging.path!=='string'||data.logging.path.length>500))throw Error('Invalid logging options.');
   if(sharedInputErrors(data.sharedInputs||[]).length)throw Error('Invalid shared inputs.');
   for(const item of data.steps){
     const action=commands.find(c=>c.id===item?.actionId);
@@ -59,7 +62,7 @@ export function saveDiscovery(storage,data){try{storage.setItem(DISCOVERY_KEY,JS
 export function markRecent(discovery,id){return {...discovery,recent:[id,...discovery.recent.filter(item=>item!==id)].slice(0,8)};}
 
 export function reviewWorkspace(workspace){
-  const modules=new Set(),targets=new Set(),files=[],permissions=[],modifying=[],previews=[],errors=sharedInputErrors(workspace.sharedInputs||[]);
+  const modules=new Set(),targets=new Set(),files=[],permissions=[],modifying=[],previews=[],errors=[...sharedInputErrors(workspace.sharedInputs||[]),...runtimeErrors(workspace)];
   const destinations=new Set();
   workspace.steps.forEach((step,index)=>{
     const a=commands.find(c=>c.id===step.actionId);if(!a){errors.push(`Step ${index+1}: unsupported command.`);return;}
