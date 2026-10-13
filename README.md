@@ -27,7 +27,7 @@ Open it in your browser and choose **Get started** to enter the dedicated builde
 
 Shellify makes common PowerShell tasks easier to assemble and understand. Find a supported action using a simple description, configure its fields, and watch the script take shape beside you.
 
-The landing page includes interactive Services, Files, and Directory examples, a Guided/Expert preview switch, a feature showcase, common use cases, and FAQs. Lightweight CSS/SVG motion graphics illustrate script assembly, shared-input connections, bulk targets, and exports. The motion button pauses every graphic, reduced-motion preferences disable animations, and graphics outside the viewport pause automatically.
+The landing page includes interactive Services, Files, and Directory examples, a Commented/Compact code preview switch, a feature showcase, common use cases, and FAQs. Lightweight CSS/SVG motion graphics illustrate script assembly, shared-input connections, bulk targets, and exports. The motion button pauses every graphic, reduced-motion preferences disable animations, and graphics outside the viewport pause automatically.
 
 It uses **twenty predefined templates and deterministic keyword matching**. It doesn't call an AI model, accept arbitrary code, or execute the generated script. Drafts, favorites, recent commands, and your saved script library stay in local storage on the current browser and device; you can also copy or download scripts and editable projects.
 
@@ -45,7 +45,7 @@ It uses **twenty predefined templates and deterministic keyword matching**. It d
 <details>
 <summary><strong>📱 Mobile preview</strong></summary>
 
-<p align="center"><img src="docs/screenshots/mobile-builder.png" alt="Shellify mobile Preview tab with word wrap and export controls" width="330"></p>
+<p align="center"><img src="docs/screenshots/mobile-builder.png" alt="Shellify mobile Preview tab with word wrap and export controls" width="320"></p>
 
 </details>
 
@@ -79,7 +79,7 @@ Screenshots were captured from a local run of the repository.
 ### The useful details
 
 - **Live preview** with syntax highlighting, line numbers, and toggleable word wrap. Wrap starts enabled; the browser remembers your preference without changing exported scripts.
-- **Guided and Expert output views.** Guided includes explanatory comments and numbered lines. Expert generates code without those comments, compacts ordinary pipelines, and hides line numbers. The selection applies to preview, clipboard, and `.ps1` downloads and is saved with the project. Expand output provides a full-width editor view on desktop.
+- **Commented and Compact code output views.** Commented includes explanatory comments and numbered lines. Compact code generates code without those comments, compacts ordinary pipelines, and hides line numbers. The selection applies to preview, clipboard, and `.ps1` downloads and is saved with the project. Expand output provides a full-width editor view on desktop.
 - **Editable, reorderable steps** with per-action requirements.
 - **Autosaved drafts** restore your steps, unfinished edits, collapsed cards, and export settings after a refresh. A status indicator reports when browser storage is unavailable. Start fresh opens an empty script.
 - **Duplicate, reset, collapse, and Undo** make long scripts easier to manage. Collapsed cards show targets, enabled flags, and validation errors. Undo remembers up to 50 changes during the current visit, including edits, removals, resets, and clearing or replacing a draft.
@@ -104,6 +104,16 @@ Screenshots were captured from a local run of the repository.
 - **Responsive dark interface** with mint and purple accents, keyboard focus styling, and reduced-motion support.
 - **No runtime libraries or backend**; Google Fonts are optional external assets with system fallbacks.
 
+## Expanded builder controls
+
+The catalog contains 30 templates, including local network configuration, folder permissions, file hashes, local groups, BitLocker, Defender, hotfix lookup and service configuration. Six workflows append undoable steps and reuse appropriate shared inputs. The homepage opens the matching workflow; it never executes scripts.
+
+Essential inputs, prerequisites and output destinations stay visible. Advanced options hold diagnostics, error policies, bulk targets and bounded conditions. Restart targets begin empty. Desktop panel widths are adjustable, configuration focus retains code preview, and the catalog offers compact/descriptive views with a single category selector.
+
+Supported results have selectable fields, bounded AND filters, sorting and limits, plus clearly labeled illustrative table/CSV/JSON samples. Optional parameterized exports promote supported custom/shared text inputs to validated string parameters and show an invocation example. Review separates blockers from informational requirements, lists targets/error policies/files/runtime settings and links back to each step.
+
+Conditions support restarting only a stopped service or running after an earlier single-target connectivity check. Summaries distinguish succeeded, failed and skipped steps. Drafts and schema-version-1 projects retain compatibility; internal guided/expert values remain supported. See [Microsoft command references and validation scope](docs/command-reference.md).
+
 ## 03 / Run locally
 
 The **[live demo](https://shellify.thehawk6353.workers.dev/)** is the recommended starting point. To explore or edit the source on your own machine, install **Node.js 20 or later** and clone the repo:
@@ -127,7 +137,7 @@ npm test
 npm run build
 ```
 
-`npm test` covers generation, quoting, validation, ordering, command matching, project portability, library history, shared inputs, bulk execution, and Expert mode. The native PowerShell parser test runs only on Windows with both Windows PowerShell and PowerShell 7 installed; it parses scripts without executing them. A separate isolated mock-cmdlet test checks bulk failure handling without network requests or system actions.
+`npm test` covers generation, quoting, validation, ordering, command matching, project portability, library history, shared inputs, bulk execution, and compact code mode. The native PowerShell parser test runs only on Windows with both Windows PowerShell and PowerShell 7 installed; it parses generated scripts. Fixture runtime checks exercise real folder listing, hashes and CSV/JSON writes in both runtimes; mock commands verify conditions and summaries without system changes. Optional Windows modules and real remote targets still require testing in your environment. A separate isolated mock-cmdlet test checks bulk failure handling without network requests or system actions.
 
 Run `npm run test:browser` after `npm ci` for automated desktop and mobile tests covering autosave, Undo, imports, favorites, library updates, shared inputs, bulk targets, output validation, clipboard, and downloads. Windows uses installed Microsoft Edge; other platforms use Playwright Chromium (`npx playwright install chromium`). Set `SHELLIFY_TEST_BROWSER=chrome` to use installed Chrome. The suite starts its own local server on port 4190 and blocks external page requests. These are development tools; the published app remains a static site.
 

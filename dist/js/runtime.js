@@ -1,6 +1,7 @@
 import {commands} from './commands.js';
 import {quote} from './validation.js';
 import {resolveStep} from './execution.js';
+import {parameterizedValues} from './parameters.js';
 export function runtimeErrors(options={}){
   const errors=[];
   for(const key of ['preflight','executionSummary'])if(options[key]!==undefined&&typeof options[key]!=='boolean')errors.push('Choose valid runtime options.');
@@ -17,7 +18,7 @@ export function preflightCode(steps,options,modules){
     checks.push("if ([System.Environment]::OSVersion.Platform -ne 'Win32NT') { throw 'This script requires Windows.' }");
     checks.push(options.version==='7'?"if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'Run this script with PowerShell 7 or newer.' }":"if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -lt 1) { throw 'Run this script with Windows PowerShell 5.1.' }");
     for(const module of modules)checks.push(`if (-not (Get-Module -ListAvailable -Name ${quote(module)})) { throw ${quote(`Required module not installed: ${module}.`)} }`);
-    const elevation=steps.some(step=>{const v=resolveStep(step,options.sharedInputs).values;return step.actionId==='processes'&&v.includeUserName||step.actionId==='restart'&&!v.whatIf&&!v.computer.trim()&&step.bulk?.field!=='computer';});
+    const elevation=steps.some((step,index)=>{const v=parameterizedValues(resolveStep(step,options.sharedInputs),index,{...options,steps});return commands.find(c=>c.id===step.actionId)?.admin||step.actionId==='processes'&&v.includeUserName||step.actionId==='restart'&&!v.whatIf&&!v.computer.trim()&&step.bulk?.field!=='computer';});
     if(elevation)checks.push("if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'Run PowerShell as administrator for these local commands.' }");
   }
   const paths=[...(options.preflight?steps.filter(s=>s.output?.format&&s.output.format!=='none').map(s=>s.output.path):[]),...(options.logging?.enabled?[options.logging.path]:[])];

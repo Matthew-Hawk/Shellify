@@ -39,7 +39,7 @@ test('CSV/JSON wrap the entire result pipeline, quote paths, and prevent overwri
     const code=generateScript([step],{version});assert.match(code,/-NoClobber -ErrorAction Stop/);
     assert.ok(code.includes("-LiteralPath 'C:\\O''Brien\\$(whoami)."+format+"'"));
     assert.match(code,/# RESULTS: Writes a new result file/);
-    if(format==='csv')assert.match(code,/@\([\s\S]*Select-Object Name, FullName, Length, LastWriteTime[\s\S]*\) \|\n    Export-Csv/);
+    if(format==='csv')assert.match(code,/@\([\s\S]*Select-Object Name, FullName, Extension, Length, LastWriteTime[\s\S]*\) \|\n    Export-Csv/);
     else assert.match(code,/ConvertTo-Json -InputObject @\([\s\S]*\) -Depth 6 \|\n    Out-File/);
   }
   const plain=createStep('files');assert.doesNotMatch(generateScript([plain]),/Export-Csv|ConvertTo-Json|Out-File/);
@@ -72,7 +72,7 @@ test('flag and cmdlet search works without accepting unsupported intent',()=>{
 });
 test('review collects modules, permission notes, targets, modifications and files',()=>{
   const ad=createStep('ad-user'),dns=createStep('dns'),restart=createStep('restart'),preview=createStep('restart');
-  ad.values.server='dc01';dns.output={format:'json',path:'dns.json'};restart.values.computer='server01';preview.values.whatIf=true;
+  restart.values.service='Spooler';preview.values.service='Spooler';ad.values.server='dc01';dns.output={format:'json',path:'dns.json'};restart.values.computer='server01';preview.values.whatIf=true;
   const review=reviewWorkspace({...freshWorkspace(),steps:[ad,dns,restart,preview]});
   assert.deepEqual(review.modules,['ActiveDirectory','DnsClient']);assert.ok(review.targets.includes('Computer: server01'));
   assert.equal(review.files[0].path,'dns.json');assert.equal(review.modifying.length,1);assert.equal(review.previews.length,1);

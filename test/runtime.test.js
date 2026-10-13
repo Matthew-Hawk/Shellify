@@ -18,7 +18,7 @@ test('preflight guards version, modules, definite local elevation and destinatio
   const code=generateScript([step],{preflight:true,version:'7',viewMode:'expert'});
   assert.match(code,/PSVersionTable.PSVersion.Major -lt 7/);assert.match(code,/Get-Module -ListAvailable -Name 'ActiveDirectory'/);
   assert.match(code,/GetUnresolvedProviderPathFromPSPath\('C:\\Reports\\O''Brien.json'\)/);assert.match(code,/-PathType Container/);assert.match(code,/Destination already exists/);assert.doesNotMatch(code,/^#/m);
-  const restart=createStep('restart');assert.match(generateScript([restart],{preflight:true}),/WindowsBuiltInRole\]::Administrator/);
+  const restart=createStep('restart');restart.values.service='Spooler';assert.match(generateScript([restart],{preflight:true}),/WindowsBuiltInRole\]::Administrator/);
   restart.values.computer='server01';assert.doesNotMatch(generateScript([restart],{preflight:true}),/WindowsBuiltInRole\]::Administrator/);
 });
 test('logging uses literal paths, prevents overwrites and stops in finally',()=>{

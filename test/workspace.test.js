@@ -59,7 +59,7 @@ test('version-specific generation and metadata cannot introduce executable code'
   assert.ok(commands.every(c=>c.versions.includes('5.1')&&c.versions.includes('7')));
 });
 test('summary and exported comments distinguish dry runs from modifying steps',()=>{
-  const step=createStep('restart');step.values.computer='server01';step.values.whatIf=true;
+  const step=createStep('restart');step.values.service='Spooler';step.values.computer='server01';step.values.whatIf=true;
   assert.equal(stepImpact(step),'preview');assert.match(stepSummary(step),/Spooler on server01.*-WhatIf/);
   const code=generateScript([step]);assert.match(code,/# PREVIEW ONLY:/);assert.doesNotMatch(code,/# CAUTION:/);
   step.values.whatIf=false;assert.equal(stepImpact(step),'modify');assert.match(generateScript([step]),/# CAUTION:/);

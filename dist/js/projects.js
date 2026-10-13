@@ -1,3 +1,6 @@
+import {resultErrors} from './results.js';
+import {parameterErrors,validationValues} from './parameters.js';
+import {conditionErrors} from './conditions.js';
 import {commands} from './commands.js';
 import {runtimeErrors} from './runtime.js';
 import {restoreWorkspace,filenameFor,stepImpact} from './workspace.js';
@@ -42,6 +45,8 @@ export function importProject(source){
       if(action.risk==='modify'&&item.output.format!=='none')throw Error('Result exports are available for read-only commands.');
     }
   }
+  if(parameterErrors(data).length)throw Error(parameterErrors(data).join(' '));
+  data.steps.forEach((step,index)=>{const action=commands.find(c=>c.id===step.actionId);const errors=[...Object.values(resultErrors(action,step)),...conditionErrors(step,index,data.steps)];if(errors.length)throw Error(errors.join(' '));});
   return restoreWorkspace({...data,libraryId:''});
 }
 
@@ -62,14 +67,15 @@ export function saveDiscovery(storage,data){try{storage.setItem(DISCOVERY_KEY,JS
 export function markRecent(discovery,id){return {...discovery,recent:[id,...discovery.recent.filter(item=>item!==id)].slice(0,8)};}
 
 export function reviewWorkspace(workspace){
-  const modules=new Set(),targets=new Set(),files=[],permissions=[],modifying=[],previews=[],errors=[...sharedInputErrors(workspace.sharedInputs||[]),...runtimeErrors(workspace)];
+  const modules=new Set(),targets=new Set(),files=[],permissions=[],modifying=[],previews=[],errors=[...sharedInputErrors(workspace.sharedInputs||[]),...runtimeErrors(workspace),...parameterErrors(workspace)];
   const destinations=new Set();
   workspace.steps.forEach((step,index)=>{
     const a=commands.find(c=>c.id===step.actionId);if(!a){errors.push(`Step ${index+1}: unsupported command.`);return;}
+    for(const message of [...Object.values(resultErrors(a,step)),...conditionErrors(step,index,workspace.steps)])errors.push(`${index+1}. ${a.name}: ${message}`);
     const label=`${index+1}. ${a.name}`;
     a.dependencies.forEach(module=>modules.add(module));
     permissions.push({label,requirements:a.requirements});
-    if(Object.keys(executionErrors(a,step,workspace.sharedInputs||[])).length||Object.keys(outputErrors(a,step.output)).length||!a.versions.includes(workspace.version))errors.push(`${label}: fix the step errors before exporting.`);
+    if(Object.keys(executionErrors(a,step,workspace.sharedInputs||[],validationValues(step,index,workspace).values)).length||Object.keys(outputErrors(a,step.output)).length||!a.versions.includes(workspace.version))errors.push(`${label}: fix the step errors before exporting.`);
     const v=resolveStep(step,workspace.sharedInputs||[]).values;
     if(step.bulk?.field)step.bulk.targets.forEach(target=>targets.add(`Bulk ${step.bulk.field}: ${target}`));
     if(v.computer?.trim())targets.add(`Computer: ${v.computer}`);

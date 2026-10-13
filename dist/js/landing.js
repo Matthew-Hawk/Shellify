@@ -15,5 +15,13 @@ function renderExample(){
 for(const button of document.querySelectorAll('[data-example]'))button.addEventListener('click',()=>{selected=button.dataset.example;renderExample();});
 for(const button of document.querySelectorAll('[data-demo-view]'))button.addEventListener('click',()=>{view=button.dataset.demoView;renderExample();});
 renderExample();
+// A single entrance sequence follows the page's reading order.
+document.querySelectorAll('.landing-page > .header,.landing-copy > *,.hero-stage,.landing-main > section:not(.landing-hero),.landing-page > footer').forEach((element,index)=>{
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches||document.body.classList.contains('motion-paused'))return;
+  element.style.setProperty('--entrance-delay',`${index*.08}s`);
+  element.classList.add('landing-entrance');
+  element.addEventListener('animationend',event=>{if(event.target===element&&event.animationName==='landing-enter')element.classList.remove('landing-entrance');});
+  element.addEventListener('animationcancel',event=>{if(event.target===element&&event.animationName==='landing-enter')element.classList.remove('landing-entrance');});
+});
 // Pause decorative work outside the viewport; all product text stays visible.
 if('IntersectionObserver' in window){const observer=new IntersectionObserver(entries=>{for(const entry of entries)entry.target.classList.toggle('motion-offscreen',!entry.isIntersecting);},{rootMargin:'100px'});document.querySelectorAll('[data-motion]').forEach(element=>observer.observe(element));}

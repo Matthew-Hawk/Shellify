@@ -6,8 +6,8 @@ export function resolveStep(step,inputs=[]){
   if(step.bulk?.field&&step.bulk.targets?.length)values[step.bulk.field]=step.bulk.targets[0];
   return {...step,values};
 }
-export function executionErrors(action,step,inputs=[]){
-  const errors=validate(action,resolveStep(step,inputs).values);
+export function executionErrors(action,step,inputs=[],validationValues=null){
+  const errors=validate(action,validationValues||resolveStep(step,inputs).values);
   for(const [name,id] of Object.entries(step.bindings||{})){
     if(!action.parameters.some(p=>p.name===name&&p.type==='text'))errors.bindings='Shared inputs can only link to text fields.';
     if(!inputs.some(input=>input.id===id))errors[name]='Choose an existing shared input or use a custom value.';

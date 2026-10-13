@@ -1,9 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
-import {commands,defaults} from '../dist/js/commands.js';
+import {commands,defaults as catalogDefaults} from '../dist/js/commands.js';
 import {quote} from '../dist/js/validation.js';
 import {generateScript} from '../dist/js/generator.js';
+import {createStep} from '../dist/js/workspace.js';
+import {settingsFor} from '../dist/js/results.js';
+const defaults=c=>({...catalogDefaults(c),...(c.id==='restart'?{service:'Spooler'}:c.id==='file-hash'?{path:'C:\\Example\\file.txt'}:{})});
 // Parse only: neither generated scripts nor test payloads are ever executed.
 test('native PowerShell parser accepts templates and preserves hostile literals', {skip:process.platform!=='win32'},()=>{
   const literals=["O'Brien",'x’; Write-Host injected; #','x‘; Write-Host injected; #','x‚; Write-Host injected; #','x‛; Write-Host injected; #','$(whoami)`; "quoted"','C:\\folder\\[test]'];
@@ -30,6 +33,14 @@ test('native PowerShell parser accepts templates and preserves hostile literals'
       for(const p of action.parameters.filter(p=>p.type==='text'))values[p.name]=literal;
       scripts.push(generateScript([{actionId:action.id,values}]));
     }
+  }
+  for(const version of ['5.1','7'])for(const viewMode of ['guided','expert']){
+    const ping=createStep('network'),files=createStep('files'),restart=createStep('restart');
+    ping.values.quiet=true;restart.values.service='Spooler';restart.values.computer="server'O'Brien";restart.condition={type:'service-stopped',sourceStep:-1};
+    files.condition={type:'connectivity',sourceStep:0};files.parameterFields.path={enabled:true,name:'Folder',required:true};
+    files.results={...settingsFor(commands.find(c=>c.id==='files'),files),fields:['Name','Length'],filters:[{field:'Length',operator:'gt',value:'10'}],sort:'Length',descending:true,limit:10};files.output={format:'csv',path:"C:\\Reports\\O'Brien.csv"};
+    scripts.push(generateScript([ping,files,restart],{version,viewMode,exportMode:'parameters',executionSummary:true,preflight:true,sharedInputs:[{id:'host',name:'Destination',value:"O'Brien",parameter:{enabled:true,name:'Destination',required:false}}]}));
+    restart.bulk={field:'service',targets:['Spooler','W32Time']};restart.onError='continue';scripts.push(generateScript([restart],{version,viewMode,executionSummary:true}));
   }
   const parser=`[Console]::InputEncoding = [Text.UTF8Encoding]::new($false)
   [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
