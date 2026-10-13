@@ -27,6 +27,8 @@ Open it in your browser and choose **Get started** to enter the dedicated builde
 
 Shellify makes common PowerShell tasks easier to assemble and understand. Find a supported action using a simple description, configure its fields, and watch the script take shape beside you.
 
+The landing page includes interactive Services, Files, and Directory examples, a Guided/Expert preview switch, a feature showcase, common use cases, and FAQs. Lightweight CSS/SVG motion graphics illustrate script assembly, shared-input connections, bulk targets, and exports. The motion button pauses every graphic, reduced-motion preferences disable animations, and graphics outside the viewport pause automatically.
+
 It uses **twenty predefined templates and deterministic keyword matching**. It doesn't call an AI model, accept arbitrary code, or execute the generated script. Drafts, favorites, recent commands, and your saved script library stay in local storage on the current browser and device; you can also copy or download scripts and editable projects.
 
 ## 01 / Find → configure → export
