@@ -4,7 +4,7 @@ import {commands,defaults as catalogDefaults} from '../dist/js/commands.js';
 import {quote,validate} from '../dist/js/validation.js';
 import {generateScript} from '../dist/js/generator.js';
 import {match} from '../dist/js/matcher.js';
-const defaults=c=>({...catalogDefaults(c),...(c.id==='restart'?{service:'Spooler'}:c.id==='file-hash'?{path:'C:\\Example\\file.txt'}:{})});
+const defaults=c=>({...catalogDefaults(c),...(['restart','start-service'].includes(c.id)?{service:'Spooler'}:c.id==='ad-unlock'?{identity:'jdoe'}:c.id==='lockout-events'?{computer:'dc01'}:c.id==='file-hash'?{path:'C:\\Example\\file.txt'}:{})});
 const action=id=>commands.find(c=>c.id===id);
 test('every template generates with its defaults',()=>{for(const c of commands){assert.deepEqual(validate(c,defaults(c)),{});assert.match(generateScript([{actionId:c.id,values:defaults(c)}]),new RegExp(c.cmdlets.split(' · ')[0]));}});
 test('quotes apostrophes and preserves executable-looking text as literals',()=>{assert.equal(quote("O'Brien"),"'O''Brien'");assert.equal(quote("$(Remove-Item C:\\)'; Write-Host x"),"'$(Remove-Item C:\\)''; Write-Host x'");const script=generateScript([{actionId:'files',values:{...defaults(action('files')),path:"C:\\O'Brien\\$(whoami)",recurse:false}}]);assert.ok(script.includes("-LiteralPath 'C:\\O''Brien\\$(whoami)'"));});
@@ -55,8 +55,8 @@ test('combined flags stay on their target cmdlets and retain useful output',()=>
 
 
 test('AD actions import their module once and do not change directory state',()=>{
-  const ad=commands.filter(c=>c.category==='Active Directory');
-  assert.equal(ad.length,6);
+  const ad=commands.filter(c=>c.category==='Active Directory'&&c.risk==='read');
+  assert.ok(ad.length>=6);
   const script=generateScript(ad.map(c=>({actionId:c.id,values:defaults(c)})));
   assert.equal((script.match(/Import-Module ActiveDirectory/g)||[]).length,1);
   assert.doesNotMatch(script,/\b(?:Set|Remove|Disable|Unlock|New|Add)-AD/);

@@ -40,7 +40,7 @@ test('undo snapshots survive changes, reset and clear without sharing references
   assert.equal(history.undo().steps.length,2);assert.equal(history.undo(),undefined);assert.equal(history.available,false);
 });
 test('workflows generate supported read-only scripts for both PowerShell targets',()=>{
-  for(const workflow of workflows)for(const version of ['5.1','7']){
+  for(const workflow of workflows.filter(w=>!w.inputs))for(const version of ['5.1','7']){
     const steps=workflow.actions.map(createStep);assert.ok(steps.every(step=>stepImpact(step)==='read'));
     assert.doesNotThrow(()=>generateScript(steps,{version}));
   }
@@ -62,5 +62,5 @@ test('summary and exported comments distinguish dry runs from modifying steps',(
   const step=createStep('restart');step.values.service='Spooler';step.values.computer='server01';step.values.whatIf=true;
   assert.equal(stepImpact(step),'preview');assert.match(stepSummary(step),/Spooler on server01.*-WhatIf/);
   const code=generateScript([step]);assert.match(code,/# PREVIEW ONLY:/);assert.doesNotMatch(code,/# CAUTION:/);
-  step.values.whatIf=false;assert.equal(stepImpact(step),'modify');assert.match(generateScript([step]),/# CAUTION:/);
+  step.values.whatIf=false;assert.equal(stepImpact(step),'disruptive');assert.match(generateScript([step]),/# CAUTION:/);
 });

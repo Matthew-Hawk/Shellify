@@ -6,7 +6,7 @@ import {quote} from '../dist/js/validation.js';
 import {generateScript} from '../dist/js/generator.js';
 import {createStep} from '../dist/js/workspace.js';
 import {settingsFor} from '../dist/js/results.js';
-const defaults=c=>({...catalogDefaults(c),...(c.id==='restart'?{service:'Spooler'}:c.id==='file-hash'?{path:'C:\\Example\\file.txt'}:{})});
+const defaults=c=>({...catalogDefaults(c),...(['restart','start-service'].includes(c.id)?{service:'Spooler'}:c.id==='ad-unlock'?{identity:'jdoe'}:c.id==='lockout-events'?{computer:'dc01'}:c.id==='file-hash'?{path:'C:\\Example\\file.txt'}:{})});
 // Parse only: neither generated scripts nor test payloads are ever executed.
 test('native PowerShell parser accepts templates and preserves hostile literals', {skip:process.platform!=='win32'},()=>{
   const literals=["O'Brien",'x’; Write-Host injected; #','x‘; Write-Host injected; #','x‚; Write-Host injected; #','x‛; Write-Host injected; #','$(whoami)`; "quoted"','C:\\folder\\[test]'];

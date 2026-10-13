@@ -1,4 +1,5 @@
 import {resultErrors} from './results.js';
+import {sourceErrors,sourceValues} from './composition.js';
 import {parameterErrors,validationValues} from './parameters.js';
 import {conditionErrors} from './conditions.js';
 import {commands} from './commands.js';
@@ -30,7 +31,7 @@ export function importProject(source){
     if(item.onError!==undefined&&!['stop','continue'].includes(item.onError))throw Error('Invalid error policy.');
     if(item.bindings!==undefined){
       if(!item.bindings||typeof item.bindings!=='object'||Array.isArray(item.bindings))throw Error('Invalid shared input links.');
-      for(const [name,id] of Object.entries(item.bindings))if(!action.parameters.some(p=>p.name===name&&p.type==='text')||typeof id!=='string'||id.length>100)throw Error('Invalid shared input link.');
+      for(const [name,id] of Object.entries(item.bindings))if(!action.parameters.some(p=>p.name===name&&['text','number'].includes(p.type))||typeof id!=='string'||id.length>100)throw Error('Invalid shared input link.');
     }
     if(item.bulk!==undefined){
       if(!item.bulk||typeof item.bulk.field!=='string'||(item.bulk.field&&!bulkFields(action).some(p=>p.name===item.bulk.field))||!Array.isArray(item.bulk.targets)||item.bulk.targets.length>50||item.bulk.targets.some(t=>typeof t!=='string'||t.length>500))throw Error('Invalid bulk targets.');
@@ -46,7 +47,8 @@ export function importProject(source){
     }
   }
   if(parameterErrors(data).length)throw Error(parameterErrors(data).join(' '));
-  data.steps.forEach((step,index)=>{const action=commands.find(c=>c.id===step.actionId);const errors=[...Object.values(resultErrors(action,step)),...conditionErrors(step,index,data.steps)];if(errors.length)throw Error(errors.join(' '));});
+  if(runtimeErrors(data).length)throw Error(runtimeErrors(data).join(' '));
+  data.steps.forEach((step,index)=>{const action=commands.find(c=>c.id===step.actionId);const errors=[...Object.values(resultErrors(action,step)),...conditionErrors(step,index,data.steps),...sourceErrors(step,index,data.steps)];if(errors.length)throw Error(errors.join(' '));});
   return restoreWorkspace({...data,libraryId:''});
 }
 
@@ -71,19 +73,20 @@ export function reviewWorkspace(workspace){
   const destinations=new Set();
   workspace.steps.forEach((step,index)=>{
     const a=commands.find(c=>c.id===step.actionId);if(!a){errors.push(`Step ${index+1}: unsupported command.`);return;}
-    for(const message of [...Object.values(resultErrors(a,step)),...conditionErrors(step,index,workspace.steps)])errors.push(`${index+1}. ${a.name}: ${message}`);
+    for(const message of [...Object.values(resultErrors(a,step)),...conditionErrors(step,index,workspace.steps),...sourceErrors(step,index,workspace.steps)])errors.push(`${index+1}. ${a.name}: ${message}`);
     const label=`${index+1}. ${a.name}`;
     a.dependencies.forEach(module=>modules.add(module));
     permissions.push({label,requirements:a.requirements});
-    if(Object.keys(executionErrors(a,step,workspace.sharedInputs||[],validationValues(step,index,workspace).values)).length||Object.keys(outputErrors(a,step.output)).length||!a.versions.includes(workspace.version))errors.push(`${label}: fix the step errors before exporting.`);
+    if(Object.keys(executionErrors(a,step,workspace.sharedInputs||[],sourceValues({...step,values:validationValues(step,index,workspace).values}))).length||Object.keys(outputErrors(a,step.output)).length||!a.versions.includes(workspace.version))errors.push(`${label}: fix the step errors before exporting.`);
     const v=resolveStep(step,workspace.sharedInputs||[]).values;
     if(step.bulk?.field)step.bulk.targets.forEach(target=>targets.add(`Bulk ${step.bulk.field}: ${target}`));
     if(v.computer?.trim())targets.add(`Computer: ${v.computer}`);
     if(v.host?.trim())targets.add(`Network host: ${v.host}`);
     if(v.server?.trim())targets.add(`${a.category==='Active Directory'?'Domain controller':'DNS server'}: ${v.server}`);
     if(a.category==='Active Directory'&&!v.server?.trim())targets.add('Active Directory: current domain');
-    if(stepImpact(step)==='modify')modifying.push(label);
-    if(stepImpact(step)==='preview')previews.push(label);
+    if(['modify','disruptive'].includes(stepImpact(step,workspace)))modifying.push(label);
+    if(stepImpact(step,workspace)==='preview')previews.push(label);
+    if(a.report){files.push({label,format:String(v.format).toLowerCase(),path:v.path});if(destinations.has(v.path?.trim().toLowerCase().replaceAll('/','\\')))errors.push(`${label}: multiple steps write to the same destination. Use separate output paths.`);destinations.add(v.path?.trim().toLowerCase().replaceAll('/','\\'));}
     if(step.output?.format&&step.output.format!=='none'){
       files.push({label,format:step.output.format,path:step.output.path});
       const path=typeof step.output.path==='string'?step.output.path.trim().toLowerCase().replaceAll('/','\\'):'';

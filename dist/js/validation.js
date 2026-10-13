@@ -16,5 +16,6 @@ export function validate(action,values){
   if(action.id==='events'&&Number(values.endHours)>=Number(values.days)*24)errors.endHours='End time must be within the look-back range.';
   if(action.id==='file-hash'&&typeof values.expected==='string'&&values.expected.trim()&&!new RegExp(`^[a-fA-F0-9]{${{SHA256:64,SHA384:96,SHA512:128}[values.algorithm]||64}}$`).test(values.expected))errors.expected='Enter a hexadecimal digest of the correct length for the selected algorithm.';
   if(action.id==='hotfix'&&typeof values.kb==='string'&&values.kb.trim()&&!/^KB[0-9]+$/i.test(values.kb))errors.kb='Use an identifier such as KB5030219.';
+  if(action.id==='reachable-hosts'&&typeof values.hosts==='string'&&(values.hosts.split(',').length>50||values.hosts.split(',').some(t=>!t.trim())))errors.hosts='Use 1–50 nonempty comma-separated hostnames.';
   return errors;
 }

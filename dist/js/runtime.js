@@ -4,6 +4,11 @@ import {resolveStep} from './execution.js';
 import {parameterizedValues} from './parameters.js';
 export function runtimeErrors(options={}){
   const errors=[];
+  if(options.dryRun!==undefined&&typeof options.dryRun!=='boolean')errors.push('Choose a valid dry run setting.');
+  if(options.targets!==undefined&&(!Array.isArray(options.targets)||options.targets.length>50||options.targets.some(t=>typeof t!=='string'||!t.trim()||t.length>500||/[\x00-\x1f\x7f]/.test(t))))errors.push('Use at most 50 single-line target names.');
+  if(options.targets?.length){if(options.exportMode==='parameters')errors.push('Fleet execution currently requires embedded values.');if(options.steps?.some(s=>{const a=commands.find(c=>c.id===s.actionId);return a&&!a.remote&&!a.report;}))errors.push('Fleet execution supports local inspection steps only. Remove commands with their own remote or domain targets.');if(options.steps?.some(s=>s.bulk?.field||s.output?.format&&s.output.format!=='none'||s.values.computer?.trim()))errors.push('Use a combined report for fleet execution; remove per-step remote targets, bulk lists and output files.');}
+  if(options.dryRun&&options.steps?.some(s=>{const a=commands.find(c=>c.id===s.actionId);return a?.risk==='modify'&&!a.whatIf;}))errors.push('Dry run cannot preview a modifying command without WhatIf. Remove that command or disable Dry run.');
+  options.steps?.forEach((s,i)=>{if(s.actionId==='report'&&i!==options.steps.length-1)errors.push('Keep the combined report as the final step.');});
   for(const key of ['preflight','executionSummary'])if(options[key]!==undefined&&typeof options[key]!=='boolean')errors.push('Choose valid runtime options.');
   if(options.logging?.enabled){
     const path=options.logging.path;
@@ -21,7 +26,7 @@ export function preflightCode(steps,options,modules){
     const elevation=steps.some((step,index)=>{const v=parameterizedValues(resolveStep(step,options.sharedInputs),index,{...options,steps});return commands.find(c=>c.id===step.actionId)?.admin||step.actionId==='processes'&&v.includeUserName||step.actionId==='restart'&&!v.whatIf&&!v.computer.trim()&&step.bulk?.field!=='computer';});
     if(elevation)checks.push("if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'Run PowerShell as administrator for these local commands.' }");
   }
-  const paths=[...(options.preflight?steps.filter(s=>s.output?.format&&s.output.format!=='none').map(s=>s.output.path):[]),...(options.logging?.enabled?[options.logging.path]:[])];
+  const paths=[...(options.preflight?steps.filter(s=>s.output?.format&&s.output.format!=='none').map(s=>s.output.path):[]),...steps.filter(s=>s.actionId==='report').map(s=>parameterizedValues(resolveStep(s,options.sharedInputs),steps.indexOf(s),{...options,steps}).path),...(options.logging?.enabled?[options.logging.path]:[])];
   for(const path of paths)checks.push(`$ShellifyDestination = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(${quote(path)})\nif (-not (Test-Path -LiteralPath (Split-Path -Path $ShellifyDestination -Parent) -PathType Container)) { throw ${quote(`Destination folder does not exist: ${path}`)} }\nif (Test-Path -LiteralPath $ShellifyDestination) { throw ${quote(`Destination already exists: ${path}`)} }`);
   return checks.join('\n');
 }

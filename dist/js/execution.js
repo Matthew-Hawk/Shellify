@@ -9,7 +9,7 @@ export function resolveStep(step,inputs=[]){
 export function executionErrors(action,step,inputs=[],validationValues=null){
   const errors=validate(action,validationValues||resolveStep(step,inputs).values);
   for(const [name,id] of Object.entries(step.bindings||{})){
-    if(!action.parameters.some(p=>p.name===name&&p.type==='text'))errors.bindings='Shared inputs can only link to text fields.';
+    if(!action.parameters.some(p=>p.name===name&&['text','number'].includes(p.type)))errors.bindings='Shared inputs can only link to text or number fields.';
     if(!inputs.some(input=>input.id===id))errors[name]='Choose an existing shared input or use a custom value.';
   }
   if(step.onError&&!['stop','continue'].includes(step.onError))errors.onError='Choose a valid error policy.';
