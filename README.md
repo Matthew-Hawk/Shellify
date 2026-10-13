@@ -32,7 +32,7 @@ It uses **fourteen predefined templates and deterministic keyword matching**. It
 ## 01 / Find → configure → export
 
 1. **Find an action.** Search for a task such as `disk space`, `list files`, or `ping`, or browse a category.
-2. **Make it yours.** Add commands, fill in their parameters, and use the arrows to change the step order.
+2. **Make it yours.** Add commands, fill in their parameters, check applicable command flags, and use the arrows to change the step order.
 3. **Review the preview.** See the actual PowerShell, requirements, and any validation errors as you build.
 4. **Take it with you.** Copy the script or download `shellify-script.ps1` for review and use in your environment.
 
@@ -72,6 +72,7 @@ Screenshots were captured from a local run of the repository.
 
 - **Live preview** with syntax highlighting, line numbers, and toggleable word wrap. Wrap starts enabled; the browser remembers your preference without changing exported scripts.
 - **Editable, reorderable steps** with per-action requirements.
+- **Command flag checkboxes** with PowerShell flag names and explanations. Toggle file recursion and hidden files, process owners, quiet ping results, nested AD membership, and service restart confirmation, dry runs, force, and returned status. Every action also offers `-Verbose`. The preview, copy, and download reflect your selections; existing recursion and confirmation defaults are preserved.
 - **Validation before export** for required fields, numeric bounds, and supported input types.
 - **Read-only and system-modifying labels** so the impact of an action is visible.
 - **Copy and `.ps1` download**, with UTF-8 BOM and Windows line endings on downloads.

@@ -8,6 +8,12 @@ import {generateScript} from '../dist/js/generator.js';
 test('native PowerShell parser accepts templates and preserves hostile literals', {skip:process.platform!=='win32'},()=>{
   const literals=["O'Brien",'x’; Write-Host injected; #','x‘; Write-Host injected; #','x‚; Write-Host injected; #','x‛; Write-Host injected; #','$(whoami)`; "quoted"','C:\\folder\\[test]'];
   const scripts=commands.map(c=>generateScript([{actionId:c.id,values:defaults(c)}]));
+  for(const c of commands){
+    const values=defaults(c);
+    for(const p of c.parameters.filter(p=>p.type==='boolean'))values[p.name]=true;
+    scripts.push(generateScript([{actionId:c.id,values}]));
+    if(c.id==='restart')scripts.push(generateScript([{actionId:c.id,values:{...values,computer:'server01'}}]));
+  }
   scripts.push(generateScript([{actionId:'restart',values:{...defaults(commands.find(c=>c.id==='restart')),computer:"remote’host",service:"Spooler'; whoami #"}}]));
   for(const action of commands.filter(c=>c.category==='Active Directory')){
     for(const literal of literals){
