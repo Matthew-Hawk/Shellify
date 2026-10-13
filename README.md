@@ -27,7 +27,7 @@ Open it in your browser and choose **Get started** to enter the dedicated builde
 
 Shellify makes common PowerShell tasks easier to assemble and understand. Find a supported action using a simple description, configure its fields, and watch the script take shape beside you.
 
-It uses **fourteen predefined templates and deterministic keyword matching**. It doesn't call an AI model, accept arbitrary code, or execute the generated script. Your work stays in the browser's memory until you copy or download it.
+It uses **fourteen predefined templates and deterministic keyword matching**. It doesn't call an AI model, accept arbitrary code, or execute the generated script. Drafts and your saved script library stay in local storage on the current browser and device; you can also copy or download scripts.
 
 ## 01 / Find → configure → export
 
@@ -72,6 +72,11 @@ Screenshots were captured from a local run of the repository.
 
 - **Live preview** with syntax highlighting, line numbers, and toggleable word wrap. Wrap starts enabled; the browser remembers your preference without changing exported scripts.
 - **Editable, reorderable steps** with per-action requirements.
+- **Autosaved drafts** restore your steps, unfinished edits, collapsed cards, and export settings after a refresh. A status indicator reports when browser storage is unavailable. Start fresh opens an empty script.
+- **Duplicate, reset, collapse, and Undo** make long scripts easier to manage. Collapsed cards show targets, enabled flags, and validation errors. Undo remembers up to 50 changes during the current visit, including edits, removals, resets, and clearing or replacing a draft.
+- **Saved script library and starter workflows** under “Scripts & workflows.” Save up to 50 named scripts on this browser; open or delete them, with a restore option for the last deletion during the current visit. System health, folder review, and AD account review workflows append related steps together.
+- **Script settings** provide a title, description, Windows-safe download filename, and PowerShell 5.1 or 7 target. Metadata is exported as comments; ping uses the parameter name for the selected version. Current templates support both versions; AD still requires compatible RSAT modules.
+- **Flag-aware summaries** distinguish `-WhatIf` restart previews from actions that actually modify the system, both in the builder and exported comments.
 - **Command flag checkboxes** with PowerShell flag names and explanations. Toggle file recursion and hidden files, process owners, quiet ping results, nested AD membership, and service restart confirmation, dry runs, force, and returned status. Every action also offers `-Verbose`. The preview, copy, and download reflect your selections; existing recursion and confirmation defaults are preserved.
 - **Validation before export** for required fields, numeric bounds, and supported input types.
 - **Read-only and system-modifying labels** so the impact of an action is visible.
