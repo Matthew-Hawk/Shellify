@@ -27,7 +27,7 @@ Open it in your browser and choose **Get started** to enter the dedicated builde
 
 Shellify makes common PowerShell tasks easier to assemble and understand. Find a supported action using a simple description, configure its fields, and watch the script take shape beside you.
 
-It uses **fourteen predefined templates and deterministic keyword matching**. It doesn't call an AI model, accept arbitrary code, or execute the generated script. Drafts and your saved script library stay in local storage on the current browser and device; you can also copy or download scripts.
+It uses **twenty predefined templates and deterministic keyword matching**. It doesn't call an AI model, accept arbitrary code, or execute the generated script. Drafts, favorites, recent commands, and your saved script library stay in local storage on the current browser and device; you can also copy or download scripts and editable projects.
 
 ## 01 / Find → configure → export
 
@@ -67,6 +67,12 @@ Screenshots were captured from a local run of the repository.
 | Find locked Active Directory users | `Search-ADAccount` | Report locked accounts |
 | Find inactive Active Directory users | `Search-ADAccount` | Report accounts with no recent directory logon |
 | Test network connectivity | `Test-Connection` | Ping a hostname or IP address |
+| Read recent event logs | `Get-WinEvent` | Bounded Windows event queries, locally or remotely |
+| List scheduled tasks | `Get-ScheduledTask` | Task names, paths, and state without starting tasks |
+| List installed software | `Get-ItemProperty` | Machine and current-user desktop software registry inventory |
+| Look up DNS records | `Resolve-DnsName` | Resolve names using the default or a specified DNS server |
+| Test a TCP port | `Test-NetConnection` | Check whether a host accepts a TCP connection |
+| List TCP connections | `Get-NetTCPConnection` | Local endpoints, peers, states, and owning processes |
 
 ### The useful details
 
@@ -77,6 +83,10 @@ Screenshots were captured from a local run of the repository.
 - **Saved script library and starter workflows** under “Scripts & workflows.” Save up to 50 named scripts on this browser; open or delete them, with a restore option for the last deletion during the current visit. System health, folder review, and AD account review workflows append related steps together.
 - **Script settings** provide a title, description, Windows-safe download filename, and PowerShell 5.1 or 7 target. Metadata is exported as comments; ping uses the parameter name for the selected version. Current templates support both versions; AD still requires compatible RSAT modules.
 - **Flag-aware summaries** distinguish `-WhatIf` restart previews from actions that actually modify the system, both in the builder and exported comments.
+- **Editable project import/export** under “Scripts & workflows.” Share a `.shellify.json` file to move steps, flags, output settings, and metadata between devices. Imports validate the format, version, command catalog, and fields before replacing the draft; Undo restores the previous draft. Unfinished edits remain editable. Files are limited to 1 MB and 200 steps. Exported projects contain the targets and paths you entered. Try importing [the network review example](docs/examples/network-review.shellify.json).
+- **Favorites and recent commands** make discovery quicker. Star commands to keep them in Favorites; Recent shows the last eight commands added. Search also recognizes cmdlet names and applicable flag names, such as `files -Force` or `-DnsOnly`.
+- **Per-step CSV and JSON results** for read-only commands. Choose the output format and destination in the step’s Results section. Generated scripts write those files only when you run them, use UTF-8, and refuse to overwrite existing files. Destination folders must exist and be writable. JSON preserves an array even for zero or one result; quiet ping CSV output includes a Reachable column. Multiple steps must use separate destinations. CSV best suits flat fields; JSON preserves nested values.
+- **Script review** groups module imports, permission and compatibility notes, remote/network targets, modifying actions, preview-only actions, and result destinations before export.
 - **Command flag checkboxes** with PowerShell flag names and explanations. Toggle file recursion and hidden files, process owners, quiet ping results, nested AD membership, and service restart confirmation, dry runs, force, and returned status. Every action also offers `-Verbose`. The preview, copy, and download reflect your selections; existing recursion and confirmation defaults are preserved.
 - **Validation before export** for required fields, numeric bounds, and supported input types.
 - **Read-only and system-modifying labels** so the impact of an action is visible.

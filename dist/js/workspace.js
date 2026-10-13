@@ -11,7 +11,7 @@ export const copy=value=>JSON.parse(JSON.stringify(value));
 export function createStep(actionId){
   const action=commands.find(c=>c.id===actionId);
   if(!action)throw Error('Unsupported action.');
-  return {id:crypto.randomUUID(),actionId,values:defaults(action),collapsed:false};
+  return {id:crypto.randomUUID(),actionId,values:defaults(action),collapsed:false,output:{format:'none',path:''}};
 }
 export function freshWorkspace(){return {steps:[createStep('disk')],title:'',description:'',filename:'shellify-script.ps1',version:'5.1'};}
 
@@ -29,7 +29,8 @@ export function restoreWorkspace(data){
       if(p.type==='boolean'&&typeof value==='boolean')values[p.name]=value;
       if(p.type!=='boolean'&&(typeof value==='string'||(typeof value==='number'&&Number.isFinite(value))))values[p.name]=String(value).slice(0,500);
     }
-    return {...createStep(action.id),values,collapsed:item.collapsed===true};
+    const output=item.output&&['none','csv','json'].includes(item.output.format)?{format:item.output.format,path:typeof item.output.path==='string'?item.output.path.slice(0,500):''}:{format:'none',path:''};
+    return {...createStep(action.id),values,collapsed:item.collapsed===true,output};
   });
   const str=(name,max,fallback='')=>typeof data[name]==='string'?data[name].slice(0,max):fallback;
   return {steps,title:str('title',100),description:str('description',1000),filename:str('filename',120,'shellify-script.ps1'),version:data.version==='7'?'7':'5.1'};
@@ -55,9 +56,9 @@ export function filenameFor(value){
 }
 export function stepSummary(step){
   const a=commands.find(c=>c.id===step.actionId);
-  const target=['service','path','host','identity'].map(key=>step.values[key]).find(Boolean)||step.values.searchBase||'Current computer / domain';
+  const target=['service','path','host','identity','log','taskName','name'].map(key=>step.values[key]).find(Boolean)||step.values.searchBase||'Current computer / domain';
   const flags=a.parameters.filter(p=>p.type==='boolean'&&step.values[p.name]===true).map(p=>p.flag);
-  return `${target}${step.values.computer?` on ${step.values.computer}`:''}${flags.length?` · ${flags.join(' ')}`:''}`;
+  return `${target}${step.values.computer?` on ${step.values.computer}`:''}${flags.length?` · ${flags.join(' ')}`:''}${step.output?.format&&step.output.format!=='none'?` · ${step.output.format.toUpperCase()} → ${step.output.path||'Choose destination'}`:''}`;
 }
 export function stepImpact(step){
   const action=commands.find(c=>c.id===step.actionId);

@@ -9,6 +9,9 @@ test('native PowerShell parser accepts templates and preserves hostile literals'
   const literals=["O'Brien",'x’; Write-Host injected; #','x‘; Write-Host injected; #','x‚; Write-Host injected; #','x‛; Write-Host injected; #','$(whoami)`; "quoted"','C:\\folder\\[test]'];
   const scripts=commands.map(c=>generateScript([{actionId:c.id,values:defaults(c)}]));
   scripts.push(generateScript(commands.map(c=>({actionId:c.id,values:defaults(c)})),{version:'7',title:'Title\nWrite-Host injected',description:'Notes\rSecond line\u2028Text'}));
+  for(const action of commands.filter(c=>c.risk==='read'))for(const format of ['csv','json']){
+    scripts.push(generateScript([{actionId:action.id,values:defaults(action),output:{format,path:`C:\\Reports\\O'Brien\\$(whoami).${format}`}}],{version:'7'}));
+  }
   for(const c of commands){
     const values=defaults(c);
     for(const p of c.parameters.filter(p=>p.type==='boolean'))values[p.name]=true;

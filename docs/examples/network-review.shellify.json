@@ -1,0 +1,40 @@
+{
+  "format": "shellify-project",
+  "schemaVersion": 1,
+  "workspace": {
+    "steps": [
+      {
+        "actionId": "dns",
+        "values": {
+          "host": "example.com",
+          "server": "",
+          "dnsOnly": true,
+          "tcpOnly": false,
+          "verbose": false
+        },
+        "collapsed": false,
+        "output": {
+          "format": "json",
+          "path": "reports/dns.json"
+        }
+      },
+      {
+        "actionId": "tcp-port",
+        "values": {
+          "host": "localhost",
+          "port": 443,
+          "verbose": false
+        },
+        "collapsed": false,
+        "output": {
+          "format": "none",
+          "path": ""
+        }
+      }
+    ],
+    "title": "Network review",
+    "description": "DNS results and a TCP port check. Create the reports folder before running.",
+    "filename": "network-review.ps1",
+    "version": "7"
+  }
+}
