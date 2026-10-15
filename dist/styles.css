@@ -89,3 +89,5 @@ dialog{background:var(--panel);color:var(--text);border:1px solid var(--border);
 @media(max-width:600px){#guide{padding:22px}.guide-card{padding:22px;max-height:calc(100dvh - 100px)}}
 
 .ring-four i{width:7px;height:7px;animation-duration:17s;animation-delay:-9s;offset-path:ellipse(48% 46% at 50% 50%)}.ring-five i{width:8px;height:8px;animation-duration:22s;animation-delay:-17s;animation-direction:reverse;background:var(--purple);box-shadow:0 0 20px #cf84ff90;offset-path:ellipse(50% 48% at 50% 50%)}.ring-six i{width:6px;height:6px;animation-duration:27s;animation-delay:-4s;offset-path:ellipse(46% 50% at 50% 50%)}
+/* The search wrapper's border provides the focus indicator for the whole field. */
+.builder-page .search-wrap input:focus-visible{outline:none}
