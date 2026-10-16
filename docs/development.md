@@ -33,6 +33,8 @@ Run `npm run test:browser` after `npm ci` for automated desktop and mobile tests
 
 `npm run build` checks the static entry files in `dist/`. It does not compile or bundle the app.
 
+Run `npm run test:a11y` for the axe accessibility scans at desktop and mobile sizes, including open dialogs, menus, and scrolled forms. These scans also run in the complete browser suite and fail on serious or critical violations. See the [accessibility audit](accessibility-audit.md) for findings and contrast review limits.
+
 GitHub Actions runs the engine and native PowerShell tests, build check, and desktop/mobile browser suite on Windows for every push and pull request. The workflow can also be run manually from the repository’s Actions tab. It uses read-only repository permissions and a 15-minute job timeout.
 
 ### Generated script analysis

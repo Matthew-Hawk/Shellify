@@ -8,9 +8,11 @@
     "build": "node tools/build.js",
     "docs:generate": "node tools/generate-command-docs.js",
     "docs:check": "node tools/generate-command-docs.js --check",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "test:a11y": "playwright test browser-tests/accessibility.spec.js"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.64.0",
     "fast-check": "^4.10.2"
   }

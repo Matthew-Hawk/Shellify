@@ -13,9 +13,9 @@ test('examples show real commands and support guided/expert switching',async({pa
 });
 test('pause control stops decorative animation and reduced motion disables it',async({page})=>{
   const orbit=page.locator('.orbit-one');await expect(orbit).toHaveCSS('animation-play-state','running');
-  await page.getByRole('button',{name:'Pause animations',exact:true}).click();await expect(orbit).toHaveCSS('animation-play-state','paused');
+  await page.getByRole('button',{name:'Motion on — Pause animations',exact:true}).click();await expect(orbit).toHaveCSS('animation-play-state','paused');
   await expect(page.locator('.assembly-step')).toHaveCSS('animation-play-state','paused');
-  await expect(page.locator('.landing-entrance')).toHaveCount(0);await page.getByRole('button',{name:'Enable animations',exact:true}).click();await expect(page.locator('#landing-title')).toHaveCSS('opacity','1');await expect(page.locator('.landing-entrance')).toHaveCount(0);
+  await expect(page.locator('.landing-entrance')).toHaveCount(0);await page.getByRole('button',{name:'Motion off — Enable animations',exact:true}).click();await expect(page.locator('#landing-title')).toHaveCSS('opacity','1');await expect(page.locator('.landing-entrance')).toHaveCount(0);
   await page.emulateMedia({reducedMotion:'reduce'});await expect(orbit).toHaveCSS('animation-name','none');await expect(page.locator('.flow-packet')).toHaveCSS('animation-name','none');
 });
 test('FAQ and primary navigation work without horizontal overflow',async({page})=>{

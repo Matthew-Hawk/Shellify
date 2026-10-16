@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 const pane=async(page,name)=>{const tab=page.getByRole('tab',{name:new RegExp(name)});if(await tab.isVisible())await tab.click();};
-const add=async(page,name)=>{await pane(page,'Discover');await page.getByRole('button',{name:`Add ${name}`,exact:true}).click();};
+const add=async(page,name)=>{await pane(page,'Discover');await page.getByRole('button',{name:`Add ${name}`,exact:false}).click();};
 test.beforeEach(async({page})=>{
   await page.route('**/*',route=>new URL(route.request().url()).origin==='http://127.0.0.1:4190'?route.continue():route.abort());
   page.on('dialog',dialog=>dialog.accept());await page.goto('/builder.html');
@@ -11,9 +11,9 @@ test('guide reopens with motion and respects pause and reduced motion',async({pa
   await page.getByRole('button',{name:'How it works'}).click();await expect(page.locator('#guide')).toBeVisible();const card=await page.locator('.guide-card').boundingBox();expect(card.x).toBeGreaterThanOrEqual(0);expect(card.x+card.width).toBeLessThanOrEqual(page.viewportSize().width);expect(card.y+card.height).toBeLessThanOrEqual(page.viewportSize().height);
   await expect(page.locator('.guide-ring i').first()).toHaveCSS('animation-name','guide-orbit');
   await page.keyboard.press('Escape');await expect(page.locator('#guide')).not.toBeVisible();
-  await page.getByRole('button',{name:'Pause animations',exact:true}).click();await expect(page.locator('.builder-dot').first()).toHaveCSS('animation-play-state','paused');
+  await page.getByRole('button',{name:'Motion on — Pause animations',exact:true}).click();await expect(page.locator('.builder-dot').first()).toHaveCSS('animation-play-state','paused');
   await page.getByRole('button',{name:'How it works'}).click();await expect(page.locator('#guide')).toHaveCSS('animation-name','none');await expect(page.locator('.guide-ring i').first()).toHaveCSS('animation-name','none');
-  await page.getByRole('button',{name:'Close guide',exact:true}).click();await page.getByRole('button',{name:'Enable animations',exact:true}).click();
+  await page.getByRole('button',{name:'Close guide',exact:true}).click();await page.getByRole('button',{name:'Motion off — Enable animations',exact:true}).click();
   await page.getByRole('button',{name:'How it works'}).click();await expect(page.locator('#guide')).toHaveCSS('animation-name','guide-pop');
   await page.emulateMedia({reducedMotion:'reduce'});await expect(page.locator('#guide')).toHaveCSS('animation-name','none');await expect(page.locator('.builder-dot').first()).toHaveCSS('animation-name','none');
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
@@ -23,7 +23,7 @@ test('autosave, duplicate, collapse, reset and Undo retain independent steps',as
   await page.getByRole('textbox',{name:/Folder path An/}).fill('C:\\Audit');
   await page.locator('.step-menu > summary').first().click();await page.getByRole('button',{name:'Duplicate step 1',exact:true}).click();
   await page.getByRole('textbox',{name:/Folder path An/}).fill('C:\\Other');
-  await page.locator('.step-menu > summary').nth(1).click();await page.getByRole('button',{name:'Reset step 2 to defaults',exact:true}).click();
+  await page.locator('.step-menu > summary').nth(1).click();await page.getByRole('button',{name:'Reset defaults for step 2',exact:true}).click();
   await page.getByRole('button',{name:'↶ Undo',exact:true}).click();
   await expect(page.getByRole('textbox',{name:/Folder path An/})).toHaveValue('C:\\Other');
   await page.getByRole('button',{name:'List files in a directory',exact:true}).nth(1).click();await page.reload();await pane(page,'Configure');
@@ -35,7 +35,7 @@ test('favorites and flag search persist after refresh',async({page})=>{
   await page.getByRole('searchbox',{name:'Search commands',exact:true}).fill('-DnsOnly');
   await page.getByRole('button',{name:'Save Look up DNS records to favorites',exact:true}).click();await page.reload();
   await page.getByRole('button',{name:'★ Favorites',exact:true}).click();await expect(page.locator('#result-count')).toHaveText('1 command');
-  await expect(page.getByRole('button',{name:'Add Look up DNS records',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Add Look up DNS records',exact:false})).toBeVisible();
 });
 test('imports are atomic and undoable',async({page})=>{
   await page.getByRole('button',{name:'Scripts & workflows',exact:true}).click();
@@ -70,7 +70,7 @@ test('shared inputs and bulk targets generate labeled loops with continuation',a
   await page.getByText('Advanced options',{exact:true}).click();await page.getByRole('combobox',{name:'Bulk target field',exact:true}).selectOption('host');await page.getByRole('textbox',{name:/Bulk targets/}).fill('server01\nserver02');
   await page.getByRole('combobox',{name:/If this step fails/}).selectOption('continue');await pane(page,'Preview');
   await expect(page.locator('#code')).toContainText('foreach');await expect(page.locator('#code')).toContainText("'server02'");await expect(page.locator('#code')).toContainText('catch');await expect(page.locator('#code')).toContainText("Name='Target'");
-  await page.getByRole('button',{name:'Review script requirements',exact:true}).click();await expect(page.locator('#review-content')).toContainText('Bulk host: server02');
+  await page.getByRole('button',{name:'View requirements — Review script requirements',exact:true}).click();await expect(page.locator('#review-content')).toContainText('Bulk host: server02');
 });
 test('CSV validation disables export until a destination is set',async({page})=>{
   await pane(page,'Configure');await page.getByRole('combobox',{name:'Output format',exact:true}).selectOption('csv');await pane(page,'Preview');await expect(page.getByRole('button',{name:/Download .ps1/})).toBeDisabled();

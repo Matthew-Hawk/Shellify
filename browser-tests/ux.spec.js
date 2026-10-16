@@ -4,8 +4,8 @@ test.beforeEach(async({page})=>{await page.route('**/*',r=>new URL(r.request().u
 
 test('one step stays open while invalid collapsed steps remain visible and reviewable',async({page})=>{
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
-  await pane(page,'Discover');await page.getByRole('button',{name:'Add Restart a Windows service',exact:true}).click();
-  await pane(page,'Discover');await page.getByRole('button',{name:'Add List running processes',exact:true}).click();
+  await pane(page,'Discover');await page.getByRole('button',{name:'Add Restart a Windows service',exact:false}).click();
+  await pane(page,'Discover');await page.getByRole('button',{name:'Add List running processes',exact:false}).click();
   await expect(page.locator('[data-collapse][aria-expanded="true"]')).toHaveCount(1);
   await expect(page.locator('[data-step-error]').nth(1)).toContainText('Fix fields');
   await page.getByRole('button',{name:'Restart a Windows service',exact:true}).click();
@@ -35,7 +35,7 @@ test('desktop dividers drag, persist and reset without covering panel controls',
 });
 
 test('keyboard search adds steps and workspace fits desktop, laptop and phone',async({page})=>{
-  await page.keyboard.press('Control+k');await expect(page.locator('#search')).toBeFocused();await page.locator('#search').fill('processes');await page.getByRole('button',{name:'Add List running processes',exact:true}).click();
+  await page.keyboard.press('Control+k');await expect(page.locator('#search')).toBeFocused();await page.locator('#search').fill('processes');await page.getByRole('button',{name:'Add List running processes',exact:false}).click();
   await expect(page.locator('#step-count')).toHaveText('2 steps');
   if(page.viewportSize().width>1100){await page.screenshot({path:'docs/screenshots/ux-builder-desktop.png'});await page.setViewportSize({width:1280,height:720});}
   const bounds=await page.locator('.workspace').boundingBox();expect(bounds.x).toBeGreaterThanOrEqual(0);expect(bounds.x+bounds.width).toBeLessThanOrEqual(page.viewportSize().width);expect(bounds.y+bounds.height).toBeLessThanOrEqual(page.viewportSize().height);
