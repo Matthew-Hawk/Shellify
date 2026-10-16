@@ -30,7 +30,7 @@ test('desktop dividers drag, persist and reset without covering panel controls',
   await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+70,box.y+box.height/2);await page.mouse.up();
   expect(Number(await divider.getAttribute('aria-valuenow'))).toBeGreaterThan(22);
   const resized=await divider.getAttribute('aria-valuenow');await page.reload();await expect(divider).toHaveAttribute('aria-valuenow',resized);
-  await divider.dblclick();await expect(divider).toHaveAttribute('aria-valuenow','22');
+  await divider.dblclick();await expect(divider).toHaveAttribute('aria-valuenow','25');
   await page.locator('#focus-output').click();await expect(page.locator('#catalog')).not.toBeVisible();await expect(divider).not.toBeVisible();await page.locator('#focus-output').click();await expect(divider).toBeVisible();
 });
 
