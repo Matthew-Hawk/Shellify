@@ -10,7 +10,7 @@ Build scripts with guided commands, editable steps, and a live PowerShell previe
 [![Try the live demo](https://img.shields.io/badge/TRY_THE_LIVE_DEMO_%E2%86%97-46f2cb?style=for-the-badge&labelColor=111126)](https://shellify.thehawk6353.workers.dev/)
 
 **The best way to interact with Shellify is the [live demo ↗](https://shellify.thehawk6353.workers.dev/).**<br>
-Open it in your browser and choose **Get started** to enter the dedicated builder—no account or installation needed.
+Open it in your browser and choose **Start building** to enter the dedicated builder—no account or installation needed.
 
 ![Shellify's dark workspace with a command catalog, script steps, and a live PowerShell preview](docs/screenshots/desktop-builder.png)
 
@@ -126,7 +126,7 @@ cd Shellify
 npm start
 ```
 
-Open **[http://127.0.0.1:4173](http://127.0.0.1:4173)** and select **Get started**, or open `http://127.0.0.1:4173/builder.html` directly. Leave the terminal running while you use the app; press **Ctrl+C** to stop it.
+Open **[http://127.0.0.1:4173](http://127.0.0.1:4173)** and select **Start building**, or open `http://127.0.0.1:4173/builder.html` directly. Leave the terminal running while you use the app; press **Ctrl+C** to stop it.
 
 The static application and `npm start` require no package installation. Development browser tests use Playwright: run `npm ci` to install test dependencies. If you prefer downloading a ZIP from GitHub, extract it, open a terminal in the folder containing `package.json`, and run `npm start`.
 
@@ -166,7 +166,7 @@ Active Directory actions require the RSAT ActiveDirectory module, a reachable do
 
 | File / folder | Responsibility |
 | :--- | :--- |
-| `dist/index.html` | Landing page with the Get started entry point |
+| `dist/index.html` | Landing page with the Start building entry point |
 | `dist/builder.html` | Dedicated responsive script builder and guide |
 | `dist/js/appearance.js` | Shared background motion and reduced-motion support |
 | `dist/js/landing.js` | Compatibility redirects for old builder bookmarks |

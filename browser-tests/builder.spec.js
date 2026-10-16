@@ -45,13 +45,13 @@ test('imports are atomic and undoable',async({page})=>{
   await page.getByRole('button',{name:'↶ Undo',exact:true}).click();await expect(page.locator('#step-count')).toHaveText('1 step');
 });
 test('expert mode removes comments from preview, clipboard and download',async({page,context})=>{
-  await pane(page,'Preview');await page.getByRole('button',{name:'Compact',exact:true}).click();
+  await pane(page,'Preview');await page.getByRole('button',{name:'Compact code',exact:true}).click();
   await expect(page.locator('#code')).not.toContainText('# Shellify');await expect(page.locator('#code')).toContainText('Get-CimInstance');
   await context.grantPermissions(['clipboard-read','clipboard-write']);await page.getByRole('button',{name:/Copy script/}).click();
   const copied=await page.evaluate(()=>navigator.clipboard.readText());expect(copied).not.toContain('#');
   const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:/Download .ps1/}).click();const download=await downloadPromise;
   const content=await readFile(await download.path(),'utf8');expect(content).toBe('\ufeff'+copied.replaceAll('\r\n','\n').replaceAll('\n','\r\n'));
-  await page.reload();await pane(page,'Preview');await expect(page.getByRole('button',{name:'Compact',exact:true})).toHaveAttribute('aria-pressed','true');
+  await page.reload();await pane(page,'Preview');await expect(page.getByRole('button',{name:'Compact code',exact:true})).toHaveAttribute('aria-pressed','true');
 });
 test('saved scripts update, rename and restore the previous contents',async({page})=>{
   await page.getByRole('button',{name:'Scripts & workflows',exact:true}).click();await page.locator('#library-name').fill('Health');await page.getByRole('button',{name:'Save new',exact:true}).click();

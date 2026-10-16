@@ -24,7 +24,7 @@ test('FAQ and primary navigation work without horizontal overflow',async({page})
   await page.getByText('Does Shellify run my script?',{exact:true}).click();await expect(page.locator('.faq-list details').first()).toHaveAttribute('open','');
   await page.getByText('Is this an AI script generator?',{exact:true}).click();await expect(page.locator('.faq-list details').nth(1)).toHaveAttribute('open','');await expect(page.locator('.faq-list details').first()).not.toHaveAttribute('open','');
   await page.getByText('Is this an AI script generator?',{exact:true}).click();await expect(page.locator('.faq-list details[open]')).toHaveCount(0);
-  await page.getByRole('link',{name:'Start building',exact:false}).click();await expect(page).toHaveURL(/builder.html$/);await expect(page.locator('#step-count')).toHaveText('1 step');
+  await page.locator('.hero-actions').getByRole('link',{name:'Start building',exact:false}).click();await expect(page).toHaveURL(/builder.html$/);await expect(page.locator('#step-count')).toHaveText('1 step');
 });
 test('home entrance completes and reduced motion keeps content visible',async({page})=>{
   await expect(page.locator('#landing-title')).toHaveCSS('opacity','1');
