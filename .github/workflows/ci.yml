@@ -29,3 +29,11 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run test:browser
+      - name: Upload accessibility scan reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: accessibility-scans
+          path: test-results/**/axe-*.json
+          if-no-files-found: ignore
+          retention-days: 14

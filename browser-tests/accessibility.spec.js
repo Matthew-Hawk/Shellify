@@ -7,6 +7,10 @@ const settings=async(page)=>page.locator('.settings-menu > summary').click();
 const library=async(page)=>page.locator('#library-button').click();
 const scenarios=[
   ['landing','/',async()=>{}],
+  ['landing motion enabled','/',async page=>page.locator('#motion-toggle').click()],
+  ['landing Files example','/',async page=>page.getByRole('button',{name:'Files',exact:true}).click()],
+  ['landing Directory example','/',async page=>page.getByRole('button',{name:'Directory',exact:true}).click()],
+  ['builder search results','/builder.html',async page=>page.locator('#search').fill('service')],
   ['landing FAQ','/',async page=>page.getByText('Is this an AI script generator?',{exact:true}).click()],
   ['builder discover','/builder.html',async()=>{}],
   ['descriptive catalog','/builder.html',async page=>page.locator('#catalog-view').click()],
@@ -18,7 +22,7 @@ const scenarios=[
   ['search tips','/builder.html',async page=>page.locator('.search-help-menu > summary').click()],
   ['guide dialog','/builder.html',async page=>page.locator('#guide-button').click()],
   ['script settings dialog','/builder.html',async page=>{await settings(page);await page.locator('#options-button').click();await page.locator('#logging-enabled').check();}],
-  ['script library dialog','/builder.html',async page=>{await library(page);await page.locator('#library-name').fill('Accessibility check');await page.locator('#save-script').click();}],
+  ['script library dialog','/builder.html',async page=>{await library(page);await page.locator('#library-name').fill('Accessibility check');await page.locator('#save-script').click();await page.locator('#share-project').click();await expect(page.locator('#share-link-field')).toBeVisible();}],
   ['shared inputs dialog','/builder.html',async page=>{await settings(page);await page.locator('#inputs-button').click();await page.locator('#add-shared-input').click();}],
   ['shared parameter inputs dialog','/builder.html',async page=>{
     await settings(page);await page.locator('#options-button').click();await page.locator('#export-mode').selectOption('parameters');await page.locator('#close-options').click();
@@ -50,7 +54,7 @@ for(const [name,url,open] of scenarios)test(`accessibility: ${name}`,async({page
   if(url.includes('builder'))await expect(page.locator('#step-count')).toHaveText('1 step');
   await open(page);
   const scans=[];
-  const scan=async phase=>{const results=await new AxeBuilder({page}).analyze();scans.push({phase,violations:results.violations,incomplete:results.incomplete});};
+  const scan=async phase=>{const results=await new AxeBuilder({page}).analyze();scans.push({phase,passes:results.passes.map(v=>({id:v.id,nodeCount:v.nodes.length})),violations:results.violations,incomplete:results.incomplete});};
   await scan('initial');
   // Modal and configuration forms scroll independently of the viewport.
   const scrolling=page.locator('dialog[open], #configure-panel:visible .steps-scroll');
@@ -62,8 +66,8 @@ for(const [name,url,open] of scenarios)test(`accessibility: ${name}`,async({page
       await scan(`scroll ${Math.round(Math.min(top,dimensions.max))}`);
     }
   }
-  const report={page:name,viewport:testInfo.project.name,scans};
-  await writeFile(testInfo.outputPath('axe.json'),JSON.stringify(report,null,2));
+  const report={page:name,viewport:page.viewportSize(),project:testInfo.project.name,scans};
+  await writeFile(testInfo.outputPath('axe-results.json'),JSON.stringify(report,null,2));
   await testInfo.attach('axe-results',{body:JSON.stringify(report,null,2),contentType:'application/json'});
   const blocking=scans.flatMap(results=>results.violations).filter(violation=>['serious','critical'].includes(violation.impact));
   expect(blocking.map(({id,impact,nodes})=>({id,impact,targets:nodes.map(node=>node.target)}))).toEqual([]);

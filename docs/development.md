@@ -14,7 +14,7 @@ npm start
 
 Open **[http://127.0.0.1:4173](http://127.0.0.1:4173)** and select **Start building**, or open `http://127.0.0.1:4173/builder.html` directly. Leave the terminal running while you use the app; press **Ctrl+C** to stop it.
 
-The static application and `npm start` require no package installation. Development browser tests use Playwright: run `npm ci` to install test dependencies. If you prefer downloading a ZIP from GitHub, extract it, open a terminal in the folder containing `package.json`, and run `npm start`.
+The static application and `npm start` require no package installation. Development checks require Node.js 22.12 or later (CI uses Node.js 24) because of the axe Playwright integration; the static server still supports Node.js 20 or later. Run `npm ci` to install test dependencies. If you prefer downloading a ZIP from GitHub, extract it, open a terminal in the folder containing `package.json`, and run `npm start`.
 
 Use a local server instead of opening `dist/index.html` directly: the app loads JavaScript modules, and clipboard access needs localhost or HTTPS plus browser permission.
 
@@ -33,7 +33,7 @@ Run `npm run test:browser` after `npm ci` for automated desktop and mobile tests
 
 `npm run build` checks the static entry files in `dist/`. It does not compile or bundle the app.
 
-Run `npm run test:a11y` for the axe accessibility scans at desktop and mobile sizes, including open dialogs, menus, and scrolled forms. These scans also run in the complete browser suite and fail on serious or critical violations. See the [accessibility audit](accessibility-audit.md) for findings and contrast review limits.
+Run `npm run test:a11y` for the axe accessibility scans at desktop and mobile sizes, including open dialogs, menus, and scrolled forms. These scans also run in the complete browser suite and fail on serious or critical violations. See the [accessibility audit](accessibility-audit.md) for findings and contrast review limits. Per-state JSON reports, including incomplete checks and passing rule counts, are retained in the CI `accessibility-scans` artifact for 14 days, including on failure.
 
 GitHub Actions runs the engine and native PowerShell tests, build check, and desktop/mobile browser suite on Windows for every push and pull request. The workflow can also be run manually from the repository’s Actions tab. It uses read-only repository permissions and a 15-minute job timeout.
 

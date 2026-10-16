@@ -4,21 +4,21 @@ Run `npm ci`, then `npm run test:a11y` to repeat the axe scans. The accessibilit
 
 ## Coverage
 
-The suite scans 19 states in both desktop (1440 × 900) and mobile (390 × 844) viewports:
+The suite scans 23 states in both desktop (1440 × 900) and mobile (390 × 844) viewports:
 
-- Landing page and an expanded FAQ.
-- Builder Discover, Configure, and Preview; descriptive catalog and the end of the catalog.
+- Landing page, enabled motion control, Files and Directory examples, and an expanded FAQ.
+- Builder Discover, Configure, and Preview; descriptive catalog, search results, and the end of the catalog.
 - Open Settings, step actions, and Search tips.
-- Guide, Script settings, saved script library, Shared inputs, shared parameter inputs, Script review, and workflow input dialogs.
+- Guide, Script settings, saved script library with a generated share link, Shared inputs, shared parameter inputs, Script review, and workflow input dialogs.
 - Expanded advanced options, troubleshooting, result fields/filters/sorting, sample output, and step parameter controls.
 
-Dialogs and configuration forms are also scanned while scrolling through their contents. Each scan runs all default axe rules; no rules or elements are excluded. Serious and critical violations fail the test. Full violations and incomplete checks are attached as JSON, with a per-state `axe.json` in `test-results/`.
+Dialogs and configuration forms are also scanned while scrolling through their contents. Each scan runs all default axe rules; no rules or elements are excluded. Serious and critical violations fail the test. Full violations and incomplete checks are attached as JSON, with a per-state `axe-results.json` in `test-results/`. Passing rule counts are included, and CI retains reports in the `accessibility-scans` artifact for 14 days, including on failure.
 
 Animations are disabled through the browser's reduced-motion preference for stable scans. External requests are blocked, matching the rest of the browser suite; optional Google Fonts use their system fallbacks.
 
 ## Findings and fixes
 
-After the fixes, all 38 accessibility scenarios passed (59 individual axe scans), with zero reported violations. The complete browser suite passed 97 tests with one existing desktop-only test skipped on mobile; all 65 engine/native-parser tests, the build, and the command-documentation check also passed.
+The original 38 accessibility scenarios passed with zero reported violations. The expanded suite additionally covers landing examples, enabled motion, search results, and generated share links; run `npm run test:a11y` to repeat all 46 viewport/state scenarios.
 
 The initial scan found serious `label-content-name-mismatch` violations. No critical violations were found.
 
