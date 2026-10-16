@@ -6,6 +6,8 @@
     "start": "node tools/serve.js",
     "test": "node --test",
     "build": "node tools/build.js",
+    "docs:generate": "node tools/generate-command-docs.js",
+    "docs:check": "node tools/generate-command-docs.js --check",
     "test:browser": "playwright test"
   },
   "devDependencies": {
