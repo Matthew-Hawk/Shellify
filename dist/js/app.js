@@ -10,12 +10,23 @@ import {troubleshooting,runtimeErrors} from './runtime.js';
 import {saveEntry,renameEntry,restoreEntry} from './library.js';
 import {resolveStep,executionErrors,sharedInputErrors,bulkFields} from './execution.js';
 import {generateScript} from './generator.js';
+import {createShareHash,restoreShareHash} from './share.js';
 import {MAX_PROJECT_BYTES,exportProject,importProject,projectFilename,outputErrors,readDiscovery,saveDiscovery,markRecent,reviewWorkspace} from './projects.js';
 import {copy,createStep,freshWorkspace,readDraft,saveDraft,readLibrary,saveLibrary,filenameFor,stepSummary,stepImpact,workflows,insertWorkflow,History} from './workspace.js';
 const $=id=>document.getElementById(id);
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const storage={getItem:key=>localStorage.getItem(key),setItem:(key,value)=>localStorage.setItem(key,value)};
 const draft=readDraft(storage);
+const initialShareHash=location.hash;
+let sharedProject=null,shareError='';
+function clearShareHash(){
+  const cleanURL=new URL(location.href);cleanURL.hash='';cleanURL.searchParams.delete('workflow');cleanURL.searchParams.delete('category');
+  window.history.replaceState(null,'',cleanURL);
+}
+if(initialShareHash){
+  try{sharedProject=await restoreShareHash(initialShareHash);}catch(error){shareError=error.message;}
+  clearShareHash();
+}
 let workspace=draft.workspace,steps=workspace.steps,category='All commands',script='';
 const history=new History();
 let discovery=readDiscovery(storage),collection='all';
@@ -194,6 +205,18 @@ $('workflow-empty').addEventListener('click',openWorkflows);
 $('collections').addEventListener('click',e=>{const b=e.target.closest('[data-collection]');if(b){collection=b.dataset.collection;renderCatalog();}});
 function downloadFile(text,filename,type){const url=URL.createObjectURL(new Blob([text],{type}));const link=document.createElement('a');link.href=url;link.download=filename;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 $('export-project').addEventListener('click',()=>{downloadFile(exportProject(workspace),projectFilename(workspace),'application/json');toast('Editable Shellify project exported');});
+$('share-project').addEventListener('click',async()=>{
+  $('project-error').textContent='';$('share-link-field').hidden=true;$('share-link').value='';$('share-project').disabled=true;
+  try{
+    const hash=await createShareHash(workspace),url=new URL(location.href);url.search='';url.hash=hash;
+    $('share-link').value=url.href;$('share-link-field').hidden=false;
+  }catch(error){$('project-error').textContent=error.message;}
+  finally{$('share-project').disabled=false;}
+});
+$('copy-share-link').addEventListener('click',async()=>{
+  try{await navigator.clipboard.writeText($('share-link').value);toast('Share link copied');}
+  catch{$('share-link').focus();$('share-link').select();$('project-error').textContent='Clipboard unavailable. Copy the selected share link.';}
+});
 $('import-project').addEventListener('change',async e=>{
   const file=e.target.files[0];if(!file)return;
   try{if(file.size>MAX_PROJECT_BYTES)throw Error('Project files must be smaller than 1 MB.');const imported=importProject(await file.text());remember();workspace=imported;syncWorkspace();$('script-library').close();showPane('configure');toast('Project imported. Use Undo to restore your previous draft.');}
@@ -223,6 +246,8 @@ $('focus-output').addEventListener('click',()=>{const expanded=$('focus-output')
 renderCategories();renderCatalog();syncWorkspace();
 if(draft.restored)toast('Your previous draft was restored');
 else if(draft.error)toast('The previous draft could not be restored. A fresh script is ready.');
+if(sharedProject){remember();workspace=sharedProject;syncWorkspace();toast('Shared project opened. Use Undo to restore your previous draft.');}
+else if(shareError){$('project-error').textContent=shareError;$('script-library').showModal();}
 
 
 
@@ -235,7 +260,7 @@ renderWrap();
 
 // Small screens show one full-size pane without discarding any working state.
 const compactLayout=window.matchMedia('(max-width: 1100px)');
-let activePane='discover';
+let activePane=sharedProject?'configure':'discover';
 const paneTabs=[...document.querySelectorAll('[data-pane]')];
 function showPane(name){
   activePane=name;
@@ -303,3 +328,17 @@ document.addEventListener('click',e=>{document.querySelectorAll('.settings-menu[
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.settings-menu[open],.step-menu[open]').forEach(menu=>{menu.open=false;menu.querySelector('summary').focus();});});
 $('steps').addEventListener('click',e=>{const header=e.target.closest('[data-header]');if(header&&!e.target.closest('button'))header.querySelector('[data-collapse]').click();});
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'&&!document.querySelector('dialog[open]')){e.preventDefault();showPane('discover');$('search').focus();$('search').select();}if((e.ctrlKey||e.metaKey)&&e.shiftKey&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)){const card=document.activeElement.closest('[data-step]');if(!card)return;const selector=e.key.toLowerCase()==='d'?'[data-duplicate]':e.key==='ArrowUp'?'[data-move="-1"]':e.key==='ArrowDown'?'[data-move="1"]':null;if(selector){e.preventDefault();card.querySelector(selector).click();}}});
+
+// Pasting a share URL into this same tab can navigate only the fragment.
+window.addEventListener('hashchange',async()=>{
+  const hash=location.hash;if(!hash)return;
+  try{
+    const imported=await restoreShareHash(hash);
+    if(location.hash!==hash)return;
+    clearShareHash();remember();workspace=imported;syncWorkspace();$('script-library').close();showPane('configure');
+    toast('Shared project opened. Use Undo to restore your previous draft.');
+  }catch(error){
+    if(location.hash!==hash)return;
+    clearShareHash();$('project-error').textContent=error.message;$('script-library').showModal();
+  }
+});

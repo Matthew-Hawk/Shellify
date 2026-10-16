@@ -35,6 +35,23 @@ Run `npm run test:browser` after `npm ci` for automated desktop and mobile tests
 
 GitHub Actions runs the engine and native PowerShell tests, build check, and desktop/mobile browser suite on Windows for every push and pull request. The workflow can also be run manually from the repository’s Actions tab. It uses read-only repository permissions and a 15-minute job timeout.
 
+### Generated script analysis
+
+Windows CI installs PSScriptAnalyzer **1.24.0** from PowerShell Gallery, then runs `tools/analyze-templates.ps1`. The generator reads the entire exported command catalog (including imported templates) and writes one script per command and supported PowerShell target to a fresh temporary directory: currently 53 commands × two targets = 106 scripts. Scripts are only analyzed, never executed, so no AD, service, network, or file operations run.
+
+Inputs start with the catalog defaults. Required fields with empty defaults receive explicit examples in `tools/generate-analysis-scripts.js`: `Spooler` for restart/start-service, `C:\Example\file.txt` for file-hash, `dc01` for lockout-events, and `jdoe` for ad-unlock. All inputs pass the application validator before generation; a new template with invalid defaults fails the check until valid examples are supplied.
+
+Default analyzer rules run with the narrow exception below. Error and ParseError diagnostics produce GitHub error annotations and fail the step after every generated script has been analyzed. Warning diagnostics produce warning annotations with the generated filename, line, column, rule, and message, but do not fail CI. Information diagnostics are omitted. Module, generation, and analyzer failures also fail the step.
+
+**Suppressed rule: `PSAvoidUsingComputerNameHardcoded`**, only for `lockout-events-ps5.1.ps1` and `lockout-events-ps7.ps1`. This template requires an explicit domain controller and deliberately emits the user's literal `-ComputerName` value; the CI example `dc01` is synthetic and contains no private infrastructure information. The rule treats this intentional literal as an Error. The runner excludes this one rule only for these two files; it remains enabled for every other template. No other rules are suppressed, and no generated script is modified to hide diagnostics. Any future suppression must name the rule, explain the specific false positive or intentional behavior here, and be scoped as narrowly as possible.
+
+To reproduce locally with PowerShell 7, choose an output directory that does not already exist:
+
+```powershell
+Install-Module PSScriptAnalyzer -RequiredVersion 1.24.0 -Scope CurrentUser -Repository PSGallery -Force
+./tools/analyze-templates.ps1 -OutputDirectory "$env:TEMP/shellify-analysis-$([guid]::NewGuid())"
+```
+
 ## 05 / Under the hood
 
 | File / folder | Responsibility |
@@ -61,6 +78,12 @@ GitHub Actions runs the engine and native PowerShell tests, build check, and des
 **Add a command:** Define its metadata, parameter schema, generator, requirements, and search phrases in `commands.js`, then add coverage in `test/`. If it needs new modules or platforms, update the script-level compatibility comments too.
 
 **Host a copy:** Publish the contents of `dist/` to a static host. The app requires no backend or server-side PowerShell runtime. Serve it over HTTPS for clipboard support.
+
+## Share links
+
+In **Scripts & workflows**, choose **Create share link**, then **Copy share link**. The link is a snapshot of the current editable project, using the same versioned schema as `.shellify.json`. It includes configured targets, paths, and settings, so share it only with intended recipients. It uses no backend: UTF-8 project JSON is compressed with `CompressionStream('deflate')` and base64url encoded in `#share=...`. The fragment is not sent to the web server. Creating links requires a browser with CompressionStream and DecompressionStream support; project file export remains available.
+
+The entire hash is limited to 16,384 characters, and the project JSON to 1 MiB before compression and while decompressing. Oversized links show an error directing users to project file export. Malformed base64url, corrupt deflate streams, invalid UTF-8, and projects rejected by `importProject` show an invalid-link error without replacing the draft. Valid links go through the existing project import validator, restore fresh step IDs, and can be undone. The consumed hash is removed from the address bar so reload does not re-import the snapshot. `browser-tests/share.spec.js` checks round trips, clipboard copying, Undo, oversized creation, malformed hashes, unsupported schemas/commands/parameters, and compressed expansion beyond the size limit on desktop and mobile.
 
 ## Keep the command catalog current
 

@@ -20,6 +20,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run docs:check
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: Install-Module PSScriptAnalyzer -RequiredVersion 1.24.0 -Scope CurrentUser -Repository PSGallery -Force -ErrorAction Stop
+      - name: Analyze every generated command template
+        shell: pwsh
+        run: ./tools/analyze-templates.ps1 -OutputDirectory "${{ runner.temp }}/shellify-analysis"
       - run: npm test
       - run: npm run build
       - run: npm run test:browser
