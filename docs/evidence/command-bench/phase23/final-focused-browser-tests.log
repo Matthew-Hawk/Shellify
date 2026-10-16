@@ -1,0 +1,27 @@
+
+> test:browser
+> playwright test browser-tests/composition-contracts.spec.js browser-tests/bench-clarity.spec.js
+
+[WebServer] (node:41144) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 1 worker
+
+(node:19032) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [desktop] › browser-tests\bench-clarity.spec.js:9:1 › persistent context follows editing, target changes, removal, undo and draft reload (1.7s)
+  ok  2 [desktop] › browser-tests\bench-clarity.spec.js:28:1 › context settings reflect fleet values and invalid edits preserve recovery and export gates (1.7s)
+  ok  3 [desktop] › browser-tests\bench-clarity.spec.js:42:1 › long identity, targets and titles reflow with compact controls at all review sizes (11.4s)
+  ok  4 [desktop] › browser-tests\composition-contracts.spec.js:13:1 › one input source owns mapping and broad scope gates export, invalidates and recovers (5.3s)
+  ok  5 [desktop] › browser-tests\composition-contracts.spec.js:39:1 › reorder, source deletion, Undo, required field edits and removal stay repairable (2.4s)
+  ok  6 [desktop] › browser-tests\composition-contracts.spec.js:56:1 › collapsed groups retain inspectable links and condition, shared and report relationships stay distinct (3.7s)
+(node:38692) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  7 [mobile] › browser-tests\bench-clarity.spec.js:9:1 › persistent context follows editing, target changes, removal, undo and draft reload (1.4s)
+  ok  8 [mobile] › browser-tests\bench-clarity.spec.js:28:1 › context settings reflect fleet values and invalid edits preserve recovery and export gates (1.5s)
+  ok  9 [mobile] › browser-tests\bench-clarity.spec.js:42:1 › long identity, targets and titles reflow with compact controls at all review sizes (8.4s)
+  ok 10 [mobile] › browser-tests\composition-contracts.spec.js:13:1 › one input source owns mapping and broad scope gates export, invalidates and recovers (4.6s)
+  ok 11 [mobile] › browser-tests\composition-contracts.spec.js:39:1 › reorder, source deletion, Undo, required field edits and removal stay repairable (2.1s)
+  ok 12 [mobile] › browser-tests\composition-contracts.spec.js:56:1 › collapsed groups retain inspectable links and condition, shared and report relationships stay distinct (3.3s)
+
+  12 passed (50.9s)

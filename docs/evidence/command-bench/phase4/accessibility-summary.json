@@ -1,0 +1,1295 @@
+{
+  "reports": [
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "scroll 57"
+        }
+      ],
+      "page": "builder configure"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 44,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 44,
+          "phase": "scroll 227"
+        }
+      ],
+      "page": "builder configure"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "scroll 57"
+        }
+      ],
+      "page": "builder discover"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 45,
+          "phase": "initial"
+        }
+      ],
+      "page": "builder discover"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "scroll 57"
+        }
+      ],
+      "page": "builder preview"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 41,
+          "phase": "initial"
+        }
+      ],
+      "page": "builder preview"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "scroll 57"
+        }
+      ],
+      "page": "builder search results"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 45,
+          "phase": "initial"
+        }
+      ],
+      "page": "builder search results"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "scroll 57"
+        }
+      ],
+      "page": "catalog end"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 45,
+          "phase": "initial"
+        }
+      ],
+      "page": "catalog end"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "scroll 57"
+        }
+      ],
+      "page": "descriptive catalog"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 45,
+          "phase": "initial"
+        }
+      ],
+      "page": "descriptive catalog"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 50,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 50,
+          "phase": "scroll 448"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 50,
+          "phase": "scroll 896"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 50,
+          "phase": "scroll 1344"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 50,
+          "phase": "scroll 1551"
+        }
+      ],
+      "page": "expanded step controls"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 52,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 52,
+          "phase": "scroll 335"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 52,
+          "phase": "scroll 670"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 52,
+          "phase": "scroll 1006"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 52,
+          "phase": "scroll 1341"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 52,
+          "phase": "scroll 1676"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 52,
+          "phase": "scroll 1935"
+        }
+      ],
+      "page": "expanded step controls"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 19,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 19,
+          "phase": "scroll 57"
+        }
+      ],
+      "page": "guide dialog"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 19,
+          "phase": "initial"
+        }
+      ],
+      "page": "guide dialog"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 37,
+          "phase": "initial"
+        }
+      ],
+      "page": "landing"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 37,
+          "phase": "initial"
+        }
+      ],
+      "page": "landing Directory example"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 37,
+          "phase": "initial"
+        }
+      ],
+      "page": "landing Directory example"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 37,
+          "phase": "initial"
+        }
+      ],
+      "page": "landing FAQ"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 37,
+          "phase": "initial"
+        }
+      ],
+      "page": "landing FAQ"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 37,
+          "phase": "initial"
+        }
+      ],
+      "page": "landing Files example"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 37,
+          "phase": "initial"
+        }
+      ],
+      "page": "landing Files example"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 37,
+          "phase": "initial"
+        }
+      ],
+      "page": "landing"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 37,
+          "phase": "initial"
+        }
+      ],
+      "page": "landing motion enabled"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 37,
+          "phase": "initial"
+        }
+      ],
+      "page": "landing motion enabled"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 26,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 26,
+          "phase": "scroll 57"
+        },
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 26,
+          "phase": "scroll 693"
+        },
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 26,
+          "phase": "scroll 1190"
+        }
+      ],
+      "page": "script library dialog"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 25,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 26,
+          "phase": "scroll 648"
+        },
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 26,
+          "phase": "scroll 1296"
+        },
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 26,
+          "phase": "scroll 1517"
+        }
+      ],
+      "page": "script library dialog"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 17,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 17,
+          "phase": "scroll 57"
+        },
+        {
+          "incompleteRuleIds": [
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 17,
+          "phase": "scroll 7"
+        }
+      ],
+      "page": "script review dialog"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 18,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 18,
+          "phase": "scroll 93"
+        }
+      ],
+      "page": "script review dialog"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 25,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 25,
+          "phase": "scroll 96"
+        },
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 25,
+          "phase": "scroll 584"
+        }
+      ],
+      "page": "script settings dialog"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 25,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 25,
+          "phase": "scroll 648"
+        },
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 25,
+          "phase": "scroll 970"
+        }
+      ],
+      "page": "script settings dialog"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "scroll 57"
+        }
+      ],
+      "page": "search tips"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 45,
+          "phase": "initial"
+        }
+      ],
+      "page": "search tips"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "scroll 57"
+        }
+      ],
+      "page": "settings menu"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 45,
+          "phase": "initial"
+        }
+      ],
+      "page": "settings menu"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 24,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 24,
+          "phase": "scroll 57"
+        }
+      ],
+      "page": "shared inputs dialog"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 24,
+          "phase": "initial"
+        }
+      ],
+      "page": "shared inputs dialog"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 24,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 24,
+          "phase": "scroll 115"
+        }
+      ],
+      "page": "shared parameter inputs dialog"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 24,
+          "phase": "initial"
+        }
+      ],
+      "page": "shared parameter inputs dialog"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "scroll 57"
+        }
+      ],
+      "page": "step actions menu"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 44,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast"
+          ],
+          "violations": [],
+          "passingRules": 44,
+          "phase": "scroll 227"
+        }
+      ],
+      "page": "step actions menu"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "duplicate-id-aria",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "duplicate-id-aria",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "scroll 448"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "duplicate-id-aria",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 43,
+          "phase": "scroll 889"
+        }
+      ],
+      "page": "step parameter controls"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "duplicate-id-aria"
+          ],
+          "violations": [],
+          "passingRules": 45,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "duplicate-id-aria"
+          ],
+          "violations": [],
+          "passingRules": 45,
+          "phase": "scroll 335"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "duplicate-id-aria"
+          ],
+          "violations": [],
+          "passingRules": 45,
+          "phase": "scroll 670"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "duplicate-id-aria"
+          ],
+          "violations": [],
+          "passingRules": 45,
+          "phase": "scroll 1006"
+        },
+        {
+          "incompleteRuleIds": [
+            "aria-prohibited-attr",
+            "color-contrast",
+            "duplicate-id-aria"
+          ],
+          "violations": [],
+          "passingRules": 45,
+          "phase": "scroll 1152"
+        }
+      ],
+      "page": "step parameter controls"
+    },
+    {
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 23,
+          "phase": "initial"
+        },
+        {
+          "incompleteRuleIds": [
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 23,
+          "phase": "scroll 57"
+        }
+      ],
+      "page": "workflow inputs dialog"
+    },
+    {
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scans": [
+        {
+          "incompleteRuleIds": [
+            "color-contrast",
+            "label-content-name-mismatch"
+          ],
+          "violations": [],
+          "passingRules": 23,
+          "phase": "initial"
+        }
+      ],
+      "page": "workflow inputs dialog"
+    }
+  ]
+}

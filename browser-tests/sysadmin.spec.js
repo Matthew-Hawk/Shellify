@@ -26,7 +26,7 @@ test('fleet certificate sweep captures report and settings survive refresh',asyn
 });
 test('typed service results and dry run generate a bounded verified change',async({page})=>{
   await page.locator('#search').fill('automatic services stopped');await page.locator('[data-add="auto-services"]').click();await page.locator('[data-next="start-service"]').click();
-  await expect(page.locator('[data-source-step]')).toHaveValue('1');await page.locator('.settings-menu > summary').click();await page.locator('#options-button').click();await page.locator('#dry-run').check();await page.locator('#close-options').click();
+  await page.locator('[data-value-source=service]').selectOption({label:'Earlier results: step 2 — Find automatic services that are stopped'});await page.locator('.settings-menu > summary').click();await page.locator('#options-button').click();await page.locator('#dry-run').check();await page.locator('#close-options').click();await page.locator('[data-acknowledge-scope]').check();
   await pane(page,'Preview');await expect(page.locator('#download')).toBeEnabled();await expect(page.locator('#code')).toContainText('$script:ShellifyOutput2');await expect(page.locator('#code')).toContainText('Start-Service -WhatIf');await expect(page.locator('#code')).toContainText('Name -eq $ShellifyTarget3');
   await pane(page,'Configure');await page.locator('[data-remove]').nth(1).click();await pane(page,'Preview');await expect(page.locator('#download')).toBeDisabled();
 });

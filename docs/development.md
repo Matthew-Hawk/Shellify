@@ -83,6 +83,10 @@ Install-Module PSScriptAnalyzer -RequiredVersion 1.24.0 -Scope CurrentUser -Repo
 
 ## Share links
 
+Projects now export schema version 3 (group behavior and explicit overrides), extending version 2 identities. Step identities and result/condition source IDs travel together and are remapped consistently to fresh IDs when a project, share link, saved draft or library version is restored. Version 1/2 projects and old indexed references remain readable and migrate to ID references. A schema-valid project with a missing or incompatible connection opens for repair; it cannot export PowerShell until the relationship is corrected. Unsupported schemas, commands, parameter keys and malformed references are rejected before replacing the draft. Older Shellify builds that only support schema versions 1/2 cannot open new version 3 exports.
+
+Relationship controls are a derived view of workspace fields (`inputSourceId`, `condition.sourceId`, shared bindings, and report steps), not a separately persisted graph. Result variable names use the current step order during generation. Scope acknowledgements store the source identity and an exact effective-configuration signature; source identities remap with portable projects, while a changed source/scope requires a new acknowledgement. The signature is a review guard, not a security signature or a browser check of actual machine state.
+
 In **Scripts & workflows**, choose **Create share link**, then **Copy share link**. The link is a snapshot of the current editable project, using the same versioned schema as `.shellify.json`. It includes configured targets, paths, and settings, so share it only with intended recipients. It uses no backend: UTF-8 project JSON is compressed with `CompressionStream('deflate')` and base64url encoded in `#share=...`. The fragment is not sent to the web server. Creating links requires a browser with CompressionStream and DecompressionStream support; project file export remains available.
 
 The entire hash is limited to 16,384 characters, and the project JSON to 1 MiB before compression and while decompressing. Oversized links show an error directing users to project file export. Malformed base64url, corrupt deflate streams, invalid UTF-8, and projects rejected by `importProject` show an invalid-link error without replacing the draft. Valid links go through the existing project import validator, restore fresh step IDs, and can be undone. The consumed hash is removed from the address bar so reload does not re-import the snapshot. `browser-tests/share.spec.js` checks round trips, clipboard copying, Undo, oversized creation, malformed hashes, unsupported schemas/commands/parameters, and compressed expansion beyond the size limit on desktop and mobile.
@@ -97,3 +101,7 @@ npm run docs:check
 ```
 
 Commit `docs/commands.md` with the catalog change. CI runs `npm run docs:check` before the engine tests and fails if the generated file is missing or stale. The check does not rewrite files and accepts both LF and CRLF line endings.
+
+### Group behavior implementation
+
+`dist/js/group-behavior.js` resolves behavior before validation and generation. Persisted group defaults and per-step override markers have one effective projection, shared by controls, scope acknowledgement, review and generation. Project schema v3 retains this behavior; v1/v2 remain readable. `test/group-behavior.test.js` covers flags in both versions/modes, migration and portability, blocked capabilities and isolated native failure/skip mocks. `browser-tests/group-behavior.spec.js` covers review/acknowledgement, overrides/reset, membership, dry run, Undo, reload, responsive dialogs and accessibility.

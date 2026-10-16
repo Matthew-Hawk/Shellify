@@ -1,0 +1,30 @@
+{
+  "phase": "phase0",
+  "viewports": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900,
+      "stepHeights": [
+        126.5,
+        126.5,
+        126.5,
+        126.5
+      ],
+      "overflow": false
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "stepHeights": [
+        130.5,
+        130.5,
+        130.5,
+        130.5
+      ],
+      "overflow": false
+    }
+  ],
+  "errors": []
+}

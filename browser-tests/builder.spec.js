@@ -65,9 +65,9 @@ test('saved scripts update, rename and restore the previous contents',async({pag
 test('shared inputs and bulk targets generate labeled loops with continuation',async({page})=>{
   await page.getByRole('button',{name:'Start fresh',exact:true}).click();await page.locator('.settings-menu > summary').click();await page.getByRole('button',{name:'Shared inputs',exact:true}).click();
   await page.getByRole('button',{name:'Add shared input',exact:true}).click();await page.getByRole('textbox',{name:'Input name',exact:true}).fill('Host');await page.getByRole('textbox',{name:'Input value',exact:true}).fill('server01');await page.getByRole('button',{name:'Close shared inputs',exact:true}).click();
-  await add(page,'Test network connectivity');await page.getByRole('combobox',{name:'Hostname or IP value source',exact:true}).selectOption({label:'Host'});
+  await add(page,'Test network connectivity');await page.getByRole('combobox',{name:'Hostname or IP value source',exact:true}).selectOption({label:'Shared input: Host'});
   await pane(page,'Preview');await expect(page.locator('#code')).toContainText("'server01'");await pane(page,'Configure');
-  await page.getByText('Advanced options',{exact:true}).click();await page.getByRole('combobox',{name:'Bulk target field',exact:true}).selectOption('host');await page.getByRole('textbox',{name:/Bulk targets/}).fill('server01\nserver02');
+  await page.getByText('Advanced options',{exact:true}).click();await page.getByRole('combobox',{name:'Hostname or IP value source',exact:true}).selectOption('bulk');await page.getByRole('textbox',{name:/Bulk targets/}).fill('server01\nserver02');
   await page.getByRole('combobox',{name:/If this step fails/}).selectOption('continue');await pane(page,'Preview');
   await expect(page.locator('#code')).toContainText('foreach');await expect(page.locator('#code')).toContainText("'server02'");await expect(page.locator('#code')).toContainText('catch');await expect(page.locator('#code')).toContainText("Name='Target'");
   await page.getByRole('button',{name:'View requirements — Review script requirements',exact:true}).click();await expect(page.locator('#review-content')).toContainText('Bulk host: server02');

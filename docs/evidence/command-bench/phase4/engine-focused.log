@@ -1,0 +1,18 @@
+✔ group defaults, explicit overrides and strongest script dry run resolve once without mutating base values (5.9549ms)
+✔ all presets agree with generated flags in both versions and output modes, retaining Force and confirmation (3.2249ms)
+✔ unsupported preview/confirmation and conflicting overrides remain blocked rather than becoming live exports (0.3948ms)
+✔ group targeting applies only to computer-capable steps and explicit target sources remain overrides (0.492ms)
+✔ live change plans expose retained overrides, unsupported commands and immutable before/after scope (0.6202ms)
+✔ inherited computer parameters replace dormant per-step bulk/parameters and display actual script scope (1.0233ms)
+✔ behavior, membership and overrides survive Undo, reload, project and share round trips (17.0647ms)
+✔ legacy nondefault step choices migrate as overrides, all new starters are grouped and malformed behavior is rejected (0.9777ms)
+✔ presets retain report paths and invalidate linked-scope acknowledgement when effective flags change (0.5679ms)
+✔ inherited failure handling records failed, successful and skipped attempts in both native runtimes and modes (2597.6336ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2734.2317

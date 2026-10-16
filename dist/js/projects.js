@@ -1,5 +1,7 @@
+import {behaviorShapeErrors,behaviorErrors,effectiveWorkspace} from './group-behavior.js';
+import {portableSteps} from './relationships.js';
 import {resultErrors} from './results.js';
-import {sourceErrors,sourceValues} from './composition.js';
+import {sourceErrors,sourceValues,scopeErrors} from './composition.js';
 import {parameterErrors,validationValues} from './parameters.js';
 import {conditionErrors} from './conditions.js';
 import {commands} from './commands.js';
@@ -10,21 +12,32 @@ import {resolveStep,executionErrors,sharedInputErrors,bulkFields} from './execut
 export const MAX_PROJECT_BYTES=1024*1024;
 export function exportProject(workspace){
   const {libraryId,...portable}=workspace;
-  return JSON.stringify({format:'shellify-project',schemaVersion:1,workspace:{...portable,steps:workspace.steps.map(({id,...step})=>step)}},null,2);
+  return JSON.stringify({format:'shellify-project',schemaVersion:3,workspace:{...portable,steps:portableSteps(workspace.steps)}},null,2);
 }
 export const projectFilename=workspace=>filenameFor(workspace.filename).replace(/\.ps1$/i,'.shellify.json');
 export function importProject(source){
   if(typeof source!=='string'||new TextEncoder().encode(source).length>MAX_PROJECT_BYTES)throw Error('Project files must be smaller than 1 MB.');
   let project;try{project=JSON.parse(source.replace(/^\ufeff/,''));}catch{throw Error('This file is not valid JSON. Choose a .shellify.json project.');}
-  if(project?.format!=='shellify-project'||project.schemaVersion!==1)throw Error('Unsupported Shellify project format or version.');
+  if(project?.format!=='shellify-project'||![1,2,3].includes(project.schemaVersion))throw Error('Unsupported Shellify project format or version.');
   const data=project.workspace;
   if(!data||!['5.1','7'].includes(data.version)||!Array.isArray(data.steps)||data.steps.length>200)throw Error('Invalid project settings or step count.');
   for(const [key,max] of [['title',100],['description',1000],['filename',120]])if(typeof data[key]!=='string'||data[key].length>max)throw Error(`Invalid project ${key}.`);
   if(data.viewMode!==undefined&&!['guided','expert'].includes(data.viewMode))throw Error('Invalid output view.');
   for(const key of ['preflight','executionSummary'])if(data[key]!==undefined&&typeof data[key]!=='boolean')throw Error('Invalid runtime options.');
   if(data.logging!==undefined&&(!data.logging||typeof data.logging.enabled!=='boolean'||typeof data.logging.path!=='string'||data.logging.path.length>500))throw Error('Invalid logging options.');
+  if(behaviorShapeErrors(data).length)throw Error(behaviorShapeErrors(data).join(' '));
   if(sharedInputErrors(data.sharedInputs||[]).length)throw Error('Invalid shared inputs.');
+  if(project.schemaVersion>=2&&(data.steps.some(s=>typeof s.id!=='string'||!s.id||s.id.length>100)||new Set(data.steps.map(s=>s.id)).size!==data.steps.length))throw Error('Invalid or duplicate step IDs.');
   for(const item of data.steps){
+    if(item.groupId!==undefined&&(typeof item.groupId!=='string'||item.groupId.length>100))throw Error('Invalid workflow group reference.');
+    if(item.inputSourceId!==undefined&&(typeof item.inputSourceId!=='string'||!item.inputSourceId||item.inputSourceId.length>100))throw Error('Invalid source reference.');
+    if(item.inputStep!==undefined&&!Number.isInteger(item.inputStep))throw Error('Invalid legacy source reference.');
+    if(item.condition?.sourceId!==undefined&&(typeof item.condition.sourceId!=='string'||item.condition.sourceId.length>100))throw Error('Invalid condition source reference.');
+    if(item.scopeAcknowledgement!==undefined&&(!item.scopeAcknowledgement||typeof item.scopeAcknowledgement.signature!=='string'||item.scopeAcknowledgement.signature.length>30000||typeof item.scopeAcknowledgement.sourceId!=='string'))throw Error('Invalid scope acknowledgement.');
+    if(item.inputSourceId!==undefined&&item.inputStep!==undefined)throw Error('Use one result source reference.');
+    if(item.condition!==undefined&&(!item.condition||typeof item.condition!=='object'||Array.isArray(item.condition)||!['none','connectivity','service-stopped'].includes(item.condition.type)))throw Error('Unsupported condition.');
+    if(item.condition?.sourceStep!==undefined&&!Number.isInteger(item.condition.sourceStep))throw Error('Invalid legacy condition reference.');
+    if(item.condition?.sourceId!==undefined&&item.condition.sourceStep!==undefined)throw Error('Use one condition source reference.');
     const action=commands.find(c=>c.id===item?.actionId);
     if(!action)throw Error('This project contains an unsupported command.');
     if(!item.values||typeof item.values!=='object'||Array.isArray(item.values))throw Error('Invalid project parameters.');
@@ -48,7 +61,7 @@ export function importProject(source){
   }
   if(parameterErrors(data).length)throw Error(parameterErrors(data).join(' '));
   if(runtimeErrors(data).length)throw Error(runtimeErrors(data).join(' '));
-  data.steps.forEach((step,index)=>{const action=commands.find(c=>c.id===step.actionId);const errors=[...Object.values(resultErrors(action,step)),...conditionErrors(step,index,data.steps),...sourceErrors(step,index,data.steps)];if(errors.length)throw Error(errors.join(' '));});
+  data.steps.forEach((step,index)=>{const action=commands.find(c=>c.id===step.actionId);const errors=[...Object.values(resultErrors(action,step))];if(errors.length)throw Error(errors.join(' '));});
   return restoreWorkspace({...data,libraryId:''});
 }
 
@@ -69,11 +82,12 @@ export function saveDiscovery(storage,data){try{storage.setItem(DISCOVERY_KEY,JS
 export function markRecent(discovery,id){return {...discovery,recent:[id,...discovery.recent.filter(item=>item!==id)].slice(0,8)};}
 
 export function reviewWorkspace(workspace){
-  const modules=new Set(),targets=new Set(),files=[],permissions=[],modifying=[],previews=[],errors=[...sharedInputErrors(workspace.sharedInputs||[]),...runtimeErrors(workspace),...parameterErrors(workspace)];
+  const groupIssues=behaviorErrors(workspace);workspace=effectiveWorkspace(workspace);
+  const modules=new Set(),targets=new Set(),files=[],permissions=[],modifying=[],previews=[],errors=[...groupIssues,...sharedInputErrors(workspace.sharedInputs||[]),...runtimeErrors(workspace),...parameterErrors(workspace)];
   const destinations=new Set();
   workspace.steps.forEach((step,index)=>{
     const a=commands.find(c=>c.id===step.actionId);if(!a){errors.push(`Step ${index+1}: unsupported command.`);return;}
-    for(const message of [...Object.values(resultErrors(a,step)),...conditionErrors(step,index,workspace.steps),...sourceErrors(step,index,workspace.steps)])errors.push(`${index+1}. ${a.name}: ${message}`);
+    for(const message of [...Object.values(resultErrors(a,step)),...conditionErrors(step,index,workspace.steps),...sourceErrors(step,index,workspace.steps,workspace),...scopeErrors(step,index,workspace.steps,workspace)])errors.push(`${index+1}. ${a.name}: ${message}`);
     const label=`${index+1}. ${a.name}`;
     a.dependencies.forEach(module=>modules.add(module));
     permissions.push({label,requirements:a.requirements});

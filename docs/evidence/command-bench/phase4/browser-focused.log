@@ -1,0 +1,25 @@
+
+> test:browser
+> playwright test browser-tests/group-behavior.spec.js
+
+[WebServer] (node:28356) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 10 tests using 1 worker
+
+(node:15672) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [desktop] › browser-tests\group-behavior.spec.js:12:1 › presets review before live changes, preserve drafts on cancel, apply and Undo with visible origins (2.9s)
+  ok  2 [desktop] › browser-tests\group-behavior.spec.js:24:1 › shared targeting, explicit overrides, reset and membership changes are reviewed and revalidated (1.6s)
+  ok  3 [desktop] › browser-tests\group-behavior.spec.js:31:1 › unsupported group preview blocks exports and group dialogs reflow with honest capability labels (8.8s)
+  ok  4 [desktop] › browser-tests\group-behavior.spec.js:41:1 › script dry run wins over group settings and removal needs a live-change review (2.7s)
+  ok  5 [desktop] › browser-tests\group-behavior.spec.js:48:1 › unsupported preset preserves last valid code and report exports retain explicit file effects (2.2s)
+(node:39664) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  6 [mobile] › browser-tests\group-behavior.spec.js:12:1 › presets review before live changes, preserve drafts on cancel, apply and Undo with visible origins (4.1s)
+  ok  7 [mobile] › browser-tests\group-behavior.spec.js:24:1 › shared targeting, explicit overrides, reset and membership changes are reviewed and revalidated (1.7s)
+  ok  8 [mobile] › browser-tests\group-behavior.spec.js:31:1 › unsupported group preview blocks exports and group dialogs reflow with honest capability labels (8.7s)
+  ok  9 [mobile] › browser-tests\group-behavior.spec.js:41:1 › script dry run wins over group settings and removal needs a live-change review (1.7s)
+  ok 10 [mobile] › browser-tests\group-behavior.spec.js:48:1 › unsupported preset preserves last valid code and report exports retain explicit file effects (2.0s)
+
+  10 passed (39.7s)

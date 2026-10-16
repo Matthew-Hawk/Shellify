@@ -1,6 +1,7 @@
 import {quote} from './validation.js';
 const schema=(fields,rows,help='')=>({fields:fields.split(',').map(part=>{const [name,type='text']=part.split(':');return {name,type};}),rows,help});
 export const resultSchemas={
+  'auto-services':schema('Name,DisplayName,State,StartMode,StartName',[{Name:'ExampleService',DisplayName:'Example service',State:'Stopped',StartMode:'Auto',StartName:'LocalSystem'}],'Stopped automatic services are candidates for investigation. Boot timing, exclusions and intended startup behavior require review.'),
   services:schema('Status,Name,DisplayName',[{Status:'Stopped',Name:'ExampleService',DisplayName:'Example service'}]),
   'service-details':schema('Name,DisplayName,State,StartMode,StartName',[{Name:'ExampleService',DisplayName:'Example service',State:'Stopped',StartMode:'Auto',StartName:'LocalSystem'}],'StartMode Auto means automatic. State describes the current service state.'),
   processes:schema('Id:number,ProcessName,MemoryMB:number',[{Id:1024,ProcessName:'ExampleApp',MemoryMB:512.5},{Id:2048,ProcessName:'ExampleTask',MemoryMB:64}],'MemoryMB is the working set in MiB (bytes divided by 1 MB in PowerShell).'),

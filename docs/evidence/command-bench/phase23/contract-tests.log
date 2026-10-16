@@ -1,0 +1,15 @@
+✔ stable result identity survives reorder, duplicate, deletion/undo, reload, projects and shares (23.2434ms)
+✔ legacy numeric references migrate once and semantic damage remains repairable on import (1.2474ms)
+✔ import cannot transfer scope acknowledgement to a different identical source (0.6973ms)
+✔ result contracts reject type, order, Name removal, remote, bulk, files and input conflicts (2.1711ms)
+✔ acknowledgement is exact, includes upstream and target edits, and never infers a safe count (3.0964ms)
+✔ scope inspection shows effective shared and runtime queries rather than unused custom text (0.503ms)
+✔ mocked zero results, failed sources and preview actions skip safely in both PowerShell runtimes (12965.5998ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13121.2761

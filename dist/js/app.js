@@ -1,3 +1,9 @@
+import {effectiveStep,effectiveWorkspace,behaviorErrors,behaviorPresets,behaviorOrigin,planBehaviorChange,moveStepToGroup} from './group-behavior.js';
+import {renderBehaviorOrigin,renderEffectiveBehavior,renderEffectiveBehaviorContent,renderProposal} from './group-controls.js';
+import {renderInputSource} from './input-source-controls.js';
+import {relationshipsFor} from './relationship-view.js';
+import {conditionSourceIndex} from './relationships.js';
+import {scriptScope} from './script-context.js';
 import {renderResults,sampleMarkup,renderCondition,renderStepParameters} from './builder-controls.js';
 import {schemaFor,settingsFor,operators,resultErrors} from './results.js';
 import {parameterErrors,parameterDefinitions,validationValues,invocation} from './parameters.js';
@@ -5,21 +11,152 @@ import {conditionErrors} from './conditions.js';
 import {commands,defaults} from './commands.js';
 import {search as searchCatalog} from './search.js';
 import {searchIndex} from './search-index.js';
-import {sourceValues} from './composition.js';
+import {sourceValues,hasResultSource,resultSourceIndex,sourceErrors,scopeErrors,scopeAcknowledged,acknowledgeScope,sourceScopeText} from './composition.js';
 import {troubleshooting,runtimeErrors} from './runtime.js';
 import {saveEntry,renameEntry,restoreEntry} from './library.js';
-import {resolveStep,executionErrors,sharedInputErrors,bulkFields} from './execution.js';
+import {resolveStep,executionErrors,sharedInputErrors} from './execution.js';
 import {generateScript} from './generator.js';
 import {createShareHash,restoreShareHash} from './share.js';
 import {MAX_PROJECT_BYTES,exportProject,importProject,projectFilename,outputErrors,readDiscovery,saveDiscovery,markRecent,reviewWorkspace} from './projects.js';
 import {copy,createStep,freshWorkspace,readDraft,saveDraft,readLibrary,saveLibrary,filenameFor,stepSummary,stepImpact,workflows,insertWorkflow,History} from './workspace.js';
 const $=id=>document.getElementById(id);
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let editingGroupId=null,pendingBehaviorChange=null;
+const displayGroupName=group=>group.name||workflows.find(w=>w.id===group.workflowId)?.name||'Workflow group';
+function openGroupSettings(id){
+  const group=workspace.groups?.find(g=>g.id===id);if(!group)return;editingGroupId=id;
+  const b=group.behavior||{},members=steps.filter(s=>s.groupId===id),supportsComputer=members.some(s=>commands.find(c=>c.id===s.actionId).parameters.some(p=>p.name==='computer'));
+  $('group-settings-error').textContent='';
+  $('group-settings-content').innerHTML=`<label class="field">Group name<input id="group-name" type="text" maxlength="100" value="${escape(displayGroupName(group))}" required></label><label class="field">Shared intent<textarea id="group-intent" maxlength="500" rows="2">${escape(group.intent||workflows.find(w=>w.id===group.workflowId)?.description||'')}</textarea></label><p>Members: ${members.map(s=>`Step ${steps.indexOf(s)+1}: ${escape(commands.find(c=>c.id===s.actionId).name)}`).join('; ')}</p><label class="field">Behavior preset<select id="group-preset"><option value="">Current / custom settings</option>${behaviorPresets.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</select><small>Presets set change behavior, failure handling and verbose evidence. Explicit step overrides are retained. Force, targets and output paths remain as configured.</small></label><fieldset class="command-flags"><legend>Targeting</legend><label class="field">Default computer input<select id="group-computer-input" ${supportsComputer?'':'disabled'}><option value="">Keep per-step targeting</option>${b.computerInputId&&!workspace.sharedInputs.some(i=>i.id===b.computerInputId)?`<option value="${escape(b.computerInputId)}" selected>Missing shared input</option>`:''}${workspace.sharedInputs.map(i=>`<option value="${escape(i.id)}" ${b.computerInputId===i.id?'selected':''}>${escape(i.name)}</option>`).join('')}</select><small>${supportsComputer?'Applies only to commands with a computer field; unsupported commands keep their own targeting. Step overrides take precedence.':'No member exposes a computer field. Per-step sources and script-wide fleet settings determine targeting.'}</small></label></fieldset><fieldset class="command-flags"><legend>Change behavior</legend><label class="field">Group change behavior<select id="group-change-mode">${[['preserve','Keep per-step change settings'],['preview','Preview supported changes'],['confirm','Apply with confirmation']].map(([v,label])=>`<option value="${v}" ${(b.changeMode||'preserve')===v?'selected':''}>${label}</option>`).join('')}</select><small>Unsupported modifying commands block export. Preview groups reject live overrides; confirmation groups require confirmation. Script-wide dry run takes precedence.</small></label></fieldset><fieldset class="command-flags"><legend>Failure handling</legend><label class="field">Group failure policy<select id="group-on-error">${[['','Keep per-step defaults'],['stop','Stop on error'],['continue','Record error and continue']].map(([v,label])=>`<option value="${v}" ${(b.onError||'')===v?'selected':''}>${label}</option>`).join('')}</select><small>Combined reports retain their own policy. Required module imports still stop. Succeeded, Failed and Skipped describe command attempts, not health.</small></label></fieldset><fieldset class="command-flags"><legend>Evidence</legend><label class="field">Verbose messages<select id="group-verbose">${[['','Keep per-step defaults'],['true','On'],['false','Off']].map(([v,label])=>`<option value="${v}" ${(b.verbose===undefined?'':String(b.verbose))===v?'selected':''}>${label}</option>`).join('')}</select></label><p>Transcript, preflight checks and execution summaries are configured for the whole script in Script settings.</p></fieldset><fieldset class="command-flags"><legend>Results</legend><p>Existing report steps, fields, filters, limits and output destinations are retained. Report, result and transcript files have file effects when the exported script runs. Writable folders and no-overwrite checks still apply.</p></fieldset>`;
+  $('group-settings').showModal();
+}
+function stageBehaviorChange(after,label,affectedIds){
+  const before={...workspace,steps},proposal=planBehaviorChange(before,after,label,[...new Set(affectedIds)]);
+  proposal.errors=[...new Set([...proposal.errors,...reviewWorkspace(after).errors])];
+  proposal.returnToGroup=$('group-settings').open;proposal.focusGroupId=proposal.returnToGroup?editingGroupId:null;proposal.returnFocusStep=affectedIds[0];
+  if(proposal.returnToGroup)$('group-settings').close();
+  pendingBehaviorChange=proposal;$('behavior-review-heading').textContent=label;
+  $('behavior-review-content').innerHTML=renderProposal(proposal,before);
+  $('behavior-live-label').hidden=!proposal.requiresAcknowledgement;$('behavior-live-ack').checked=false;
+  $('apply-behavior-change').disabled=proposal.requiresAcknowledgement;$('behavior-review-error').textContent='';
+  $('behavior-review').showModal();
+}
+const cloneCurrentWorkspace=()=>copy({...workspace,steps});
+$('group-settings-content').addEventListener('change',e=>{
+  if(e.target.id!=='group-preset'){$('group-preset').value='';return;}
+  const preset=behaviorPresets.find(p=>p.id===e.target.value);if(!preset)return;
+  $('group-change-mode').value=preset.settings.changeMode;$('group-on-error').value=preset.settings.onError;$('group-verbose').value=String(preset.settings.verbose);
+});
+$('close-group-settings').addEventListener('click',()=>$('group-settings').close());
+$('review-group-settings').addEventListener('click',()=>{
+  if(!$('group-name').value.trim()){$('group-settings-error').textContent='Enter a group name.';$('group-name').focus();return;}
+  const after=cloneCurrentWorkspace(),group=after.groups.find(g=>g.id===editingGroupId);if(!group)return;
+  group.name=$('group-name').value.trim();group.intent=$('group-intent').value;group.behavior={changeMode:$('group-change-mode').value};
+  if($('group-on-error').value)group.behavior.onError=$('group-on-error').value;
+  if($('group-verbose').value)group.behavior.verbose=$('group-verbose').value==='true';
+  if($('group-computer-input').value)group.behavior.computerInputId=$('group-computer-input').value;
+  stageBehaviorChange(after,'Review group behavior',after.steps.filter(s=>s.groupId===group.id).map(s=>s.id));
+});
+$('close-behavior-review').addEventListener('click',()=>$('behavior-review').close());
+$('behavior-review').addEventListener('close',()=>{if(pendingBehaviorChange?.returnToGroup){$('group-settings').showModal();$('review-group-settings').focus();}else if(pendingBehaviorChange?.returnFocusStep)document.querySelector(`[data-step="${pendingBehaviorChange.returnFocusStep}"] [data-collapse]`)?.focus({preventScroll:true});pendingBehaviorChange=null;});
+$('behavior-live-ack').addEventListener('change',()=>$('apply-behavior-change').disabled=!!pendingBehaviorChange?.requiresAcknowledgement&&!$('behavior-live-ack').checked);
+$('apply-behavior-change').addEventListener('click',()=>{
+  const proposal=pendingBehaviorChange;if(!proposal||proposal.requiresAcknowledgement&&!$('behavior-live-ack').checked)return;
+  if(JSON.stringify({...workspace,steps})!==proposal.before){$('behavior-review-error').textContent='The workflow changed. Cancel and review the current settings again.';return;}
+  remember();pendingBehaviorChange=null;$('behavior-review').close();workspace=proposal.after;syncWorkspace({preservePreview:true});
+  $('dry-run').checked=workspace.dryRun===true;$('fleet-targets').value=(workspace.targets||[]).join('\n');
+  if($('script-options').open)$('dry-run').focus();else if(proposal.focusGroupId)document.querySelector(`[data-group-settings="${CSS.escape(proposal.focusGroupId)}"]`)?.focus({preventScroll:true});else if(proposal.returnFocusStep)focusBenchStep(proposal.returnFocusStep);
+  toast('Behavior configuration applied. Use Undo to restore it.');
+});
+$('steps').addEventListener('click',e=>{
+  const settings=e.target.closest('[data-group-settings]');if(settings){openGroupSettings(settings.dataset.groupSettings);return;}
+  const reset=e.target.closest('[data-reset-behavior]'),target=e.target.closest('[data-override-target]');if(!reset&&!target)return;
+  const stepId=(reset||target).closest('[data-step]').dataset.step,after=cloneCurrentWorkspace(),step=after.steps.find(s=>s.id===stepId);step.behaviorOverrides||={};
+  if(reset){
+    const key=reset.dataset.resetBehavior;delete step.behaviorOverrides[key];
+    if(behaviorOrigin(step,key,after)!=='Group default'){
+      if(key==='onError'){const group=after.groups.find(g=>g.id===step.groupId),recipe=workflows.find(w=>w.id===group?.workflowId);step.onError=recipe?.inputs&&step.actionId!=='report'?'continue':'stop';}
+      else if(key==='computer'){step.values.computer='';delete step.bindings.computer;if(step.bulk.field==='computer')step.bulk.field='';delete step.parameterFields.computer;}
+      else step.values[key]=defaults(commands.find(c=>c.id===step.actionId))[key];
+    }
+  }else step.behaviorOverrides.computer=true;
+  stageBehaviorChange(after,reset?'Review reset to inherited value':'Review computer target override',[stepId]);
+});
+$('steps').addEventListener('change',e=>{
+  const input=e.target.closest('[data-step-group]');if(!input)return;
+  const step=steps.find(s=>s.id===input.closest('[data-step]').dataset.step),choice=input.value;input.value=step.groupId||'';
+  const after=cloneCurrentWorkspace();let groupId=choice;
+  if(choice==='__new__'){groupId=crypto.randomUUID();after.groups.push({id:groupId,name:'Custom workflow',intent:'Steps sharing an operational purpose.',collapsed:false});}
+  moveStepToGroup(after,step.id,groupId||undefined);
+  const affected=after.steps.filter(s=>s.id===step.id||s.groupId===groupId||s.groupId===step.groupId).map(s=>s.id);
+  stageBehaviorChange(after,'Review workflow group membership',affected);
+});
+let inspectedRelationship=null;
+function relationshipButtons(step){
+  return relationshipsFor({...workspace,steps},step).map(edge=>{
+    const source=steps.find(s=>s.id===edge.sourceId),from=source?` · Step ${steps.indexOf(source)+1} → ${steps.indexOf(step)+1}`:edge.kind==='results'||edge.kind==='condition'&&step.condition?.type==='connectivity'?' · Missing source':edge.field?' · '+edge.field:'';
+    return `<button class="relationship-button ${edge.errors.length?'blocked-relationship':''}" data-relationship="${edge.kind}" data-relationship-target="${step.id}" ${edge.field?`data-relationship-field="${escape(edge.field)}"`:''} aria-label="${escape(edge.label+from+(edge.errors.length?' · Needs attention':''))} — Inspect for step ${steps.indexOf(step)+1}${edge.field?' '+escape(edge.field):''}">${edge.label}${escape(from)}${edge.errors.length?' · Needs attention':''}</button>`;
+  }).join('');
+}
+function refreshRelationships(){
+  for(const row of document.querySelectorAll('[data-relationships]')){
+    const step=steps.find(s=>s.id===row.dataset.relationships);if(!step)continue;
+    const markup=(steps.indexOf(step)>0?'<span class="sequence-label">Then <small>· execution order</small></span>':'')+relationshipButtons(step);
+    if(row.relationshipMarkup!==markup){row.innerHTML=markup;row.relationshipMarkup=markup;}
+  }
+  for(const row of document.querySelectorAll('[data-group-relationships]')){
+    const markup='<span>Connections in collapsed workflow</span>'+steps.filter(s=>s.groupId===row.dataset.groupRelationships).map(relationshipButtons).join('');
+    if(row.relationshipMarkup!==markup){row.innerHTML=markup;row.relationshipMarkup=markup;}
+  }
+}
+function inspectedEdge(){const step=steps.find(s=>s.id===inspectedRelationship?.targetId);return step&&relationshipsFor({...workspace,steps},step).find(e=>e.kind===inspectedRelationship.kind&&e.field===inspectedRelationship.field);}
+function openRelationship(button){
+  inspectedRelationship={targetId:button.dataset.relationshipTarget,kind:button.dataset.relationship,field:button.dataset.relationshipField};
+  const edge=inspectedEdge();if(!edge)return;
+  $('relationship-heading').textContent=edge.label;
+  $('relationship-content').innerHTML=`<p>${escape(edge.detail)}</p>${edge.errors.length?`<p class="error">${escape(edge.errors.join(' '))}</p>`:''}<p class="dialog-help">This describes the exported script. Nothing has executed here.</p>`;
+  $('remove-relationship').hidden=edge.kind==='report';$('relationship-details').showModal();
+}
+$('close-relationship').addEventListener('click',()=>$('relationship-details').close());
+$('edit-relationship').addEventListener('click',()=>{
+  const edge=inspectedEdge();if(!edge)return;$('relationship-details').close();
+  if(edge.groupDefault){openGroupSettings(steps.find(s=>s.id===edge.targetId).groupId);return;}focusBenchStep(edge.targetId);
+  const card=document.querySelector(`[data-step="${edge.targetId}"]`);
+  if(edge.kind==='condition'){card.querySelector('.advanced-options').open=true;card.querySelector('[data-condition="type"]').focus();}
+  else if(edge.kind!=='report')card.querySelector(`[data-value-source="${edge.field||'service'}"]`)?.focus();
+});
+$('remove-relationship').addEventListener('click',()=>{
+  const edge=inspectedEdge(),step=steps.find(s=>s.id===edge?.targetId);if(!step)return;
+  if(edge.groupDefault){const after=cloneCurrentWorkspace(),changed=after.steps.find(s=>s.id===step.id);changed.behaviorOverrides||={};changed.behaviorOverrides.computer=true;delete changed.bindings.computer;$('relationship-details').close();stageBehaviorChange(after,'Review computer target override',[step.id]);return;}remember();
+  if(edge.kind==='results'){delete step.inputSourceId;delete step.inputStep;delete step.scopeAcknowledgement;}
+  if(edge.kind==='condition')step.condition={type:'none'};
+  if(edge.kind==='shared')delete step.bindings[edge.field];
+  $('relationship-details').close();renderSteps();focusBenchStep(step.id);toast('Relationship removed. Use Undo to restore it.');
+});
+$('steps').addEventListener('click',e=>{
+  const connection=e.target.closest('[data-relationship]');if(connection){openRelationship(connection);return;}
+  const change=e.target.closest('[data-change-source]');if(change)change.closest('[data-step]').querySelector(`[data-value-source="${change.dataset.changeSource}"]`)?.focus();
+  const source=e.target.closest('[data-edit-source]');if(source)focusBenchStep(source.dataset.editSource);
+});
+$('steps').addEventListener('input',e=>{
+  const input=e.target.closest('[data-value-source],[data-source-targets],[data-acknowledge-scope]');if(!input)return;
+  const step=steps.find(s=>s.id===input.closest('[data-step]').dataset.step);if(!step)return;
+  if(input.matches('[data-source-targets]')){if(editingInput!==input){remember();editingInput=input;}step.bulk.targets=input.value.split(/\r?\n/).map(v=>v.trim()).filter(Boolean);renderPreview();persist();return;}
+  remember();
+  if(input.matches('[data-acknowledge-scope]')){if(input.checked)acknowledgeScope(step,steps,workspace);else delete step.scopeAcknowledgement;renderPreview();persist();return;}
+  const field=input.dataset.valueSource,mode=input.value;if(field==='computer'){step.behaviorOverrides||={};step.behaviorOverrides.computer=true;}
+  delete step.bindings[field];if(step.bulk?.field===field)step.bulk.field='';
+  if(field==='service'){delete step.inputSourceId;delete step.inputStep;delete step.scopeAcknowledgement;}
+  if(mode.startsWith('shared:')){step.bindings[field]=mode.slice(7);delete step.parameterFields[field];}
+  if(mode.startsWith('results:')){step.inputSourceId=mode.slice(8);step.bulk.field='';delete step.parameterFields.service;}
+  if(mode==='bulk'){step.bulk={field,targets:step.bulk?.targets||[]};delete step.parameterFields[field];}
+  renderSteps();document.querySelector(`[data-step="${step.id}"] [data-value-source="${field}"]`)?.focus({preventScroll:true});
+});
 function highlightSelectedStep(){
   const selected=steps.find(s=>!s.collapsed);
   document.querySelectorAll('[data-code-step]').forEach(line=>line.classList.toggle('selected-code',line.dataset.codeStep===selected?.id));
   document.querySelectorAll('[data-step]').forEach(card=>card.classList.toggle('selected-step',card.dataset.step===selected?.id));
-  $('preview-selection').textContent=!$('preview-stale').hidden?'Previous preview · Out of date':selected?'Step '+(steps.indexOf(selected)+1)+' · '+commands.find(c=>c.id===selected.actionId).name:'Full script';
+  $('preview-selection').textContent=!$('preview-stale').hidden?(lastValidPreview?'Previous preview · Out of date':'Draft incomplete · No valid preview'):selected?'Step '+(steps.indexOf(selected)+1)+' · '+commands.find(c=>c.id===selected.actionId).name:'Full script';
   $('locate-code').disabled=!document.querySelector('.selected-code');
 }
 function focusBenchStep(id){
@@ -62,8 +199,8 @@ function trackRecent(id){discovery=markRecent(discovery,id);saveDiscovery(storag
 let editingInput=null;
 function remember(){history.remember(workspace);editingInput=null;$('undo').disabled=false;}
 function persist(){workspace.steps=steps;const saved=saveDraft(storage,workspace);$('autosave-status').textContent=saved?'✓ Saved on this browser':'Autosave unavailable';$('autosave-status').classList.toggle('error',!saved);}
-function syncWorkspace(){lastValidPreview=null;steps=workspace.steps;$('export-mode').value=workspace.exportMode||'embedded';$('script-title').value=workspace.title;$('script-description').value=workspace.description;$('script-filename').value=workspace.filename;$('target-version').value=workspace.version;$('preflight').checked=workspace.preflight;$('execution-summary').checked=workspace.executionSummary;$('logging-enabled').checked=workspace.logging.enabled;$('logging-path').value=workspace.logging.path;renderSharedInputs();renderSteps();}
-function updateSummary(step){const card=document.querySelector(`[data-step="${step.id}"]`);if(!card)return;const impact=stepImpact(step,workspace);card.querySelector('[data-summary]').textContent=stepSummary({...step,values:sourceValues(resolveStep(step,workspace.sharedInputs))})+`${step.bulk?.field?` · ${step.bulk.targets.length} targets`:''}${step.onError==='continue'?' · Continue on error':''}${step.condition?.type==='service-stopped'?' · Only if stopped':step.condition?.type==='connectivity'?` · If check ${step.condition.sourceStep+1} succeeds`:''}`;const badge=card.querySelector('[data-impact]');badge.textContent=impact==='preview'?'PREVIEW ONLY':impact==='disruptive'?'DISRUPTIVE':impact==='modify'?'MODIFIES SYSTEM':step.output?.format&&step.output.format!=='none'?'WRITES RESULT FILE':'READ ONLY';badge.className=`tag ${['modify','disruptive'].includes(impact)?'modify':''}`;const risk=card.querySelector('[data-risk]');if(risk)risk.textContent=impact==='preview'?'Preview only: -WhatIf reports the planned change without modifying the target.':step.actionId==='restart'?'⚠ Restarting a service may interrupt active users. Review before running.':'⚠ Changes the selected target. Verify permissions and review before running.';}
+function syncWorkspace({preservePreview=false}={}){if(!preservePreview)lastValidPreview=null;steps=workspace.steps;$('export-mode').value=workspace.exportMode||'embedded';$('script-title').value=workspace.title;$('script-description').value=workspace.description;$('script-filename').value=workspace.filename;$('target-version').value=workspace.version;$('preflight').checked=workspace.preflight;$('execution-summary').checked=workspace.executionSummary;$('logging-enabled').checked=workspace.logging.enabled;$('logging-path').value=workspace.logging.path;renderSharedInputs();renderSteps();}
+function updateSummary(step){const card=document.querySelector(`[data-step="${step.id}"]`);if(!card)return;const impact=stepImpact(step,workspace),effective=effectiveStep(step,workspace);card.querySelector('[data-summary]').textContent=stepSummary({...effective,values:sourceValues(resolveStep(effective,workspace.sharedInputs))})+`${effective.bulk?.field?` · ${effective.bulk.targets.length} targets`:''}${effective.onError==='continue'?' · Continue on error':''}${step.condition?.type==='service-stopped'?' · Only if stopped':step.condition?.type==='connectivity'?` · If check ${conditionSourceIndex(step,steps)+1} succeeds`:''}`;const badge=card.querySelector('[data-impact]');badge.textContent=impact==='preview'?'PREVIEW ONLY':impact==='disruptive'?'DISRUPTIVE':impact==='modify'?'MODIFIES SYSTEM':commands.find(c=>c.id===step.actionId).report||step.output?.format&&step.output.format!=='none'?'WRITES RESULT FILE':'READ ONLY';badge.className=`tag ${['modify','disruptive'].includes(impact)?'modify':''}`;const risk=card.querySelector('[data-risk]');if(risk)risk.textContent=impact==='preview'?'Preview only: -WhatIf reports the planned change without modifying the target.':step.actionId==='restart'?'⚠ Restarting a service may interrupt active users. Review before running.':'⚠ Changes the selected target. Verify permissions and review before running.';}
 
 let toastTimer;
 function toast(message){
@@ -94,14 +231,20 @@ function renderCategories(){const categories=['All commands','Sysadmin Essential
 function renderField(s,p){
   const id=`${s.id}-${p.name}`,describedBy=`${id}-help ${id}-error`;
   if(p.type==='select')return `<label class="field" for="${id}">${escape(p.label)}<select id="${id}" data-param="${p.name}" aria-describedby="${describedBy}">${p.options.map(value=>`<option ${s.values[p.name]===value?'selected':''}>${escape(value)}</option>`).join('')}</select><small id="${id}-help">${escape(p.help)}</small><small class="error" id="${id}-error"></small></label>`;
-  if(p.type==='boolean')return `<label class="field check" for="${id}"><input id="${id}" data-param="${p.name}" type="checkbox" ${s.values[p.name]?'checked':''} aria-describedby="${describedBy}"><span><span class="flag-title">${escape(p.label)} <code>${escape(p.flag)}</code></span><small id="${id}-help">${escape(p.help)}</small><small class="error" id="${id}-error"></small></span></label>`;
-  const linked=s.bindings?.[p.name],bulk=s.bulk?.field===p.name,resultLinked=p.name==='service'&&s.inputStep!==undefined&&s.inputStep!==-1,value=resultLinked?(s.inputStep<0?'Missing source step':'Names from step '+(s.inputStep+1)):resolveStep(s,workspace.sharedInputs).values[p.name];
-  const binding=['text','number'].includes(p.type)&&(workspace.sharedInputs.length||linked)?`<label class="binding-picker" for="${id}-binding">${escape(p.label)} value source<select id="${id}-binding" data-binding="${p.name}" ${bulk?'disabled':''}><option value="">Custom value${bulk?' (bulk targets below)':''}</option>${linked&&!workspace.sharedInputs.some(i=>i.id===linked)?`<option value="${escape(linked)}" selected>Missing shared input</option>`:''}${workspace.sharedInputs.map(i=>`<option value="${escape(i.id)}" ${linked===i.id?'selected':''}>${escape(i.name)}</option>`).join('')}</select></label>`:'';
-  return `<label class="field" for="${id}">${escape(p.label)}${!p.required?' <span>(optional)</span>':''}<input id="${id}" data-param="${p.name}" type="${p.type}" value="${escape(value)}" ${linked||bulk?'disabled':''} ${p.required?'required':''} ${p.type==='number'?`min="${p.min}" max="${p.max}" step="1"`:'maxlength="500"'} placeholder="${p.name==='service'?'Spooler':''}" aria-describedby="${describedBy}"><small id="${id}-help">${escape(p.help)}</small><small class="error" id="${id}-error"></small></label>${binding}`;
+  if(p.type==='boolean'){const effective=effectiveStep(s,workspace);return `<label class="field check" for="${id}"><input id="${id}" data-param="${p.name}" type="checkbox" ${effective.values[p.name]?'checked':''} aria-describedby="${describedBy}"><span><span class="flag-title">${escape(p.label)} <code>${escape(p.flag)}</code></span><small id="${id}-help">${escape(p.help)}</small><small class="error" id="${id}-error"></small></span></label>${['whatIf','confirm','verbose'].includes(p.name)?renderBehaviorOrigin(s,p.name,workspace):''}`;}
+  if(p.name==='computer'&&behaviorOrigin(s,'computer',workspace)==='Group default'){
+    const effective=effectiveStep(s,workspace),value=resolveStep(effective,workspace.sharedInputs).values.computer;
+    return `<div class="inherited-target"><strong>Computer target: ${escape(value||'Shared input is empty or missing')}</strong><p>Inherited from the group’s shared computer input.</p><button class="text-button" data-override-target>Override computer target</button></div>`;
+  }
+  const control=renderInputSource(s,p,{...workspace,steps});
+  const targetOrigin=p.name==='computer'?renderBehaviorOrigin(s,'computer',workspace):'';
+  if(typeof control==='string')return control+targetOrigin;
+  return (control?.picker||'')+`<label class="field" for="${id}">${escape(p.label)}${!p.required?' <span>(optional)</span>':''}<input id="${id}" data-param="${p.name}" type="${p.type}" value="${escape(s.values[p.name])}" ${p.required?'required':''} ${p.type==='number'?`min="${p.min}" max="${p.max}" step="1"`:'maxlength="500"'} placeholder="${p.name==='service'?'Spooler':''}" aria-describedby="${describedBy}"><small id="${id}-help">${escape(p.help)}</small><small class="error" id="${id}-error"></small></label>${targetOrigin}`;
+
 }
 function renderExecution(step,action){
-  const id=step.id,fields=bulkFields(action),bulk=step.bulk||{field:'',targets:[]};
-  return `<fieldset class="command-flags"><legend>Execution</legend><label class="field" for="${id}-onError">If this step fails<select id="${id}-onError" data-execution="onError"><option value="stop" ${step.onError!=='continue'?'selected':''}>Stop the script</option><option value="continue" ${step.onError==='continue'?'selected':''}>Record error and continue</option></select><small>Continue reports a warning and an error result. Required module imports still stop on failure.</small></label>${fields.length?`<label class="field" for="${id}-bulkField">Bulk target field<select id="${id}-bulkField" data-execution="bulkField"><option value="">One target</option>${fields.map(p=>`<option value="${p.name}" ${bulk.field===p.name?'selected':''}>${escape(p.label)}</option>`).join('')}</select></label><label class="field" for="${id}-bulkTargets" ${bulk.field?'':'hidden'}>Bulk targets<textarea id="${id}-bulkTargets" data-execution="bulkTargets" rows="3" maxlength="26000" aria-describedby="${id}-bulk-error">${escape(bulk.targets.join('\n'))}</textarea><small>One target per line, up to 50. Results include a Target column. File output combines all targets.</small></label>`:''}<small id="${id}-bulk-error" class="error"></small></fieldset>`;
+  const id=step.id,effective=effectiveStep(step,workspace);
+  return `<fieldset class="command-flags"><legend>Execution</legend><label class="field" for="${id}-onError">If this step fails<select id="${id}-onError" data-execution="onError"><option value="stop" ${effective.onError!=='continue'?'selected':''}>Stop the script</option><option value="continue" ${effective.onError==='continue'?'selected':''}>Record error and continue</option></select><small>Continue reports a warning and an error result. Required module imports still stop on failure.</small></label>${renderBehaviorOrigin(step,'onError',workspace)}<small id="${id}-bulk-error" class="error"></small></fieldset>`;
 }
 function renderOutput(step,action){
   if(action.risk==='modify'||action.report)return '';
@@ -116,26 +259,27 @@ function renderSteps(){
   $('steps').innerHTML=steps.map((s,i)=>{
     const a=commands.find(c=>c.id===s.actionId);
     const group=(workspace.groups||[]).find(g=>g.id===s.groupId),recipe=group&&workflows.find(w=>w.id===group.workflowId),members=group?steps.filter(s=>s.groupId===group.id):[];
-    const modifying=members.filter(s=>['modify','disruptive'].includes(stepImpact(s,workspace))).length;
-    const groupHeader=group&&steps[i-1]?.groupId!==s.groupId?`<div class="workflow-group" data-workflow-group="${escape(group.id)}"><button class="text-button" data-group-collapse aria-expanded="${!group.collapsed}">${group.collapsed?'▸':'▾'} ${escape(recipe.name)}</button><small>${members.length} steps · ${members.length-modifying} read-only or preview · ${modifying} modifies</small><div><button class="text-button" data-group-move="-1" aria-label="Move ${escape(recipe.name)} up">↑</button><button class="text-button" data-group-move="1" aria-label="Move ${escape(recipe.name)} down">↓</button><button class="text-button" data-group-remove aria-label="Delete ${escape(recipe.name)} group">×</button></div></div>`:'';
-    const source=a.id==='start-service'?`<label class="field">Service name source<select data-source-step><option value="-1">Custom service name</option>${steps.slice(0,i).map((producer,index)=>commands.find(c=>c.id===producer.actionId).outputType==='services'?`<option value="${index}" ${s.inputStep===index?'selected':''}>Use results from step ${index+1}</option>`:'').join('')}</select><small>Only earlier services results with a Name field can feed this action.</small></label>`:'';
-    return `${groupHeader}<article ${group?.collapsed?'hidden':''} class="script-step ${s.collapsed?'collapsed':'expanded'}" data-step="${s.id}"><div class="step-top" data-header><span class="step-num">${String(i+1).padStart(2,'0')}</span><button class="step-title" data-collapse aria-expanded="${!s.collapsed}" aria-controls="${s.id}-body">${escape(a.name)} <span aria-hidden="true">${s.collapsed?'▸':'▾'}</span></button><div class="step-actions"><button data-move="-1" ${i===0?'disabled':''} aria-label="Move step ${i+1} up" title="Move up (Ctrl+Shift+↑)">↑</button><button data-move="1" ${i===steps.length-1?'disabled':''} aria-label="Move step ${i+1} down" title="Move down (Ctrl+Shift+↓)">↓</button><button data-remove aria-label="Remove step ${i+1}">×</button></div></div><p class="step-summary" data-summary></p><span data-impact class="tag"></span><span data-step-error class="error step-validation"></span><details class="step-menu"><summary aria-label="Step ${i+1} actions" title="Step actions">⋯</summary><div><button data-duplicate class="text-button" aria-label="Duplicate step ${i+1}" title="Ctrl+Shift+D">Duplicate</button><button data-reset class="text-button" aria-label="Reset defaults for step ${i+1}">Reset defaults</button></div></details><div id="${s.id}-body" ${s.collapsed?'hidden':''}><p class="step-description">${escape(a.description)}</p><span class="cmdlet">${escape(a.cmdlets)}</span>${source}<div class="step-fields">${a.parameters.filter(p=>p.type!=='boolean').map(p=>renderField(s,p)).join('')}</div>${a.parameters.some(p=>p.type==='boolean'&&p.name!=='verbose')?`<fieldset class="command-flags"><legend>Command flags</legend><p class="flags-help">Choose options for this step.</p>${a.parameters.filter(p=>p.type==='boolean'&&p.name!=='verbose').map(p=>renderField(s,p)).join('')}</fieldset>`:''}${renderOutput(s,a)}${renderResults(s,a)}${renderStepParameters(s,a,workspace)}<details class="advanced-options"><summary>Advanced options</summary>${a.parameters.filter(p=>p.name==='verbose').map(p=>renderField(s,p)).join('')}${renderExecution(s,a)}${renderCondition(s,i,steps)}</details><details class="requirements troubleshooting"><summary>Details</summary><strong>Requirements & compatibility</strong><p>${escape(a.requirements)}</p><p data-compatibility>${a.versions.includes(workspace.version)?`Supports PowerShell ${workspace.version} on Windows.`:'Unavailable for the selected version.'}</p><strong>Common problems & fixes</strong><ul>${troubleshooting(a).map(tip=>`<li>${escape(tip)}</li>`).join('')}</ul></details>${a.risk==='modify'?'<div class="risk-note" data-risk></div>':''}</div></article>`;
+    const modifying=members.filter(s=>['modify','disruptive'].includes(stepImpact(s,workspace))).length,fileEffects=members.filter(s=>commands.find(c=>c.id===s.actionId).report||s.output?.format&&s.output.format!=='none').length;
+    const groupHeader=group&&steps[i-1]?.groupId!==s.groupId?`<div class="workflow-group" data-workflow-group="${escape(group.id)}"><button class="text-button" data-group-collapse aria-expanded="${!group.collapsed}">${group.collapsed?'▸':'▾'} ${escape(group.name||recipe?.name||'Workflow group')}</button><small data-group-counts>${members.length} steps · ${modifying} modifies · ${fileEffects} writes files</small><div><button class="text-button" data-group-move="-1" aria-label="Move ${escape(group.name||recipe?.name||'Workflow group')} up">↑</button><button class="text-button" data-group-move="1" aria-label="Move ${escape(group.name||recipe?.name||'Workflow group')} down">↓</button><button class="text-button" data-group-remove aria-label="Delete ${escape(group.name||recipe?.name||'Workflow group')} group">×</button></div><p class="group-intent">${escape(group.intent||recipe?.description||'Steps sharing an operational purpose')}</p><button class="toolbar-button" data-group-settings="${escape(group.id)}">Behavior & presets</button></div>`:'';
+    return `${groupHeader}${group?.collapsed&&steps[i-1]?.groupId!==s.groupId?`<div class="group-relationships" data-group-relationships="${escape(group.id)}"></div>`:''}<div class="relationship-row" data-relationships="${s.id}" ${group?.collapsed?'hidden':''}></div><article ${group?.collapsed?'hidden':''} class="script-step ${s.collapsed?'collapsed':'expanded'}" data-step="${s.id}"><div class="step-top" data-header><span class="step-num">${String(i+1).padStart(2,'0')}</span><button class="step-title" data-collapse aria-expanded="${!s.collapsed}" aria-controls="${s.id}-body">${escape(a.name)} <span aria-hidden="true">${s.collapsed?'▸':'▾'}</span></button></div><p class="step-summary" data-summary></p><div class="step-meta"><span data-impact class="tag"></span><div class="step-actions"><button data-move="-1" ${i===0?'disabled':''} aria-label="Move step ${i+1} up" title="Move up (Ctrl+Shift+↑)">↑</button><button data-move="1" ${i===steps.length-1?'disabled':''} aria-label="Move step ${i+1} down" title="Move down (Ctrl+Shift+↓)">↓</button><button data-remove aria-label="Remove step ${i+1}">×</button></div></div><span data-step-error class="error step-validation"></span><details class="step-menu"><summary aria-label="Step ${i+1} actions" title="Step actions">⋯</summary><div><button data-duplicate class="text-button" aria-label="Duplicate step ${i+1}" title="Ctrl+Shift+D">Duplicate</button><button data-reset class="text-button" aria-label="Reset defaults for step ${i+1}">Reset defaults</button><label class="field">Move step to group<select data-step-group><option value="">Ungrouped — end of workflow</option>${(workspace.groups||[]).map(g=>`<option value="${escape(g.id)}" ${g.id===s.groupId?'selected':''}>${escape(g.name||workflows.find(w=>w.id===g.workflowId)?.name||'Workflow group')}</option>`).join('')}<option value="__new__">Create group from this step</option></select></label></div></details><div id="${s.id}-body" ${s.collapsed?'hidden':''}><p class="step-description">${escape(a.description)}</p><span class="cmdlet">${escape(a.cmdlets)}</span><div class="step-fields">${a.parameters.filter(p=>p.type!=='boolean').map(p=>renderField(s,p)).join('')}</div>${a.parameters.some(p=>p.type==='boolean'&&p.name!=='verbose')?`<fieldset class="command-flags"><legend>Command flags</legend><p class="flags-help">Choose options for this step.</p>${a.parameters.filter(p=>p.type==='boolean'&&p.name!=='verbose').map(p=>renderField(s,p)).join('')}</fieldset>`:''}${renderEffectiveBehavior(s,workspace)}${renderOutput(s,a)}${renderResults(s,a)}${renderStepParameters(s,a,workspace)}<details class="advanced-options"><summary>Advanced options</summary>${a.parameters.filter(p=>p.name==='verbose').map(p=>renderField(s,p)).join('')}${renderExecution(s,a)}${renderCondition(s,i,steps)}</details><details class="requirements troubleshooting"><summary>Details</summary><strong>Requirements & compatibility</strong><p>${escape(a.requirements)}</p><p data-compatibility>${a.versions.includes(workspace.version)?`Supports PowerShell ${workspace.version} on Windows.`:'Unavailable for the selected version.'}</p><strong>Common problems & fixes</strong><ul>${troubleshooting(a).map(tip=>`<li>${escape(tip)}</li>`).join('')}</ul></details>${a.risk==='modify'?'<div class="risk-note" data-risk></div>':''}</div></article>`;
   }).join('');for(const d of openDetails){const card=document.querySelector(`[data-step="${d.id}"]`);if(card)for(const detail of card.querySelectorAll('details'))if(detail.className===d.kind)detail.open=true;}renderPreview();persist();
 }
 // Tokenize first, then escape each token. User values never become HTML.
 function highlight(line){const pattern=/(#[^\n]*$|'(?:[^']|'')*'|\$[\w_.]+|\b[A-Za-z]+-[A-Za-z]+\b|-[A-Za-z]+\b)/g;let html='',last=0;for(const m of line.matchAll(pattern)){html+=escape(line.slice(last,m.index));const token=m[0],kind=token.startsWith('#')?'comment':token.startsWith("'")?'string':token.startsWith('$')?'variable':token.startsWith('-')?'param':'cmdlet';html+=`<span class="syntax-${kind}">${escape(token)}</span>`;last=m.index+token.length;}return html+escape(line.slice(last));}
 function renderPreview(){
-  const review=reviewWorkspace({...workspace,steps});
+  for(const step of steps)if(step.scopeAcknowledgement&&!scopeAcknowledged(step,steps,workspace))delete step.scopeAcknowledgement;
+  const evaluated=effectiveWorkspace({...workspace,steps}),review=reviewWorkspace({...workspace,steps});
+  refreshRelationships();
   const incomplete=[];
   let invalid=review.errors.length>0;
   for(const s of steps){
-    const a=commands.find(c=>c.id===s.actionId),errors=executionErrors(a,s,workspace.sharedInputs,sourceValues({...s,values:validationValues(s,steps.indexOf(s),workspace).values})),outputIssues=outputErrors(a,s.output),compatible=a.versions.includes(workspace.version);
+    const a=commands.find(c=>c.id===s.actionId),effective=evaluated.steps.find(t=>t.id===s.id),errors=executionErrors(a,effective,workspace.sharedInputs,sourceValues({...effective,values:validationValues(effective,steps.indexOf(s),evaluated).values})),outputIssues=outputErrors(a,s.output),compatible=a.versions.includes(workspace.version);
     invalid ||= Object.keys(errors).length>0||!compatible;
     const pending=pristineSteps.has(s.id)&&!a.parameters.some(p=>touchedFields.has(s.id+'-'+p.name)&&errors[p.name]);
-    if(Object.keys(errors).length||Object.keys(outputIssues).length||!compatible)incomplete.push(s.id);
+    if(Object.keys(errors).length||Object.keys(outputIssues).length||!compatible||review.errors.some(message=>message.startsWith(`${steps.indexOf(s)+1}. `)))incomplete.push(s.id);
     const card=document.querySelector(`[data-step="${s.id}"]`);
     card.querySelector('[data-compatibility]').textContent=compatible?`Supports PowerShell ${workspace.version} on Windows.`:'Unavailable for the selected version.';
-    card.querySelector('[data-step-error]').textContent=!compatible?'Choose a compatible PowerShell version.':Object.keys(errors).length?(pending?'Needs configuration':'Fix fields or execution settings'):Object.keys(outputIssues).length?'Fix result output settings':review.errors.some(message=>message.startsWith(`${steps.indexOf(s)+1}. `))?'Choose a unique output destination':'';
+    card.querySelector('[data-step-error]').textContent=!compatible?'Choose a compatible PowerShell version.':Object.keys(errors).length?(pending?'Needs configuration':'Fix fields or execution settings'):Object.keys(outputIssues).length?'Fix result output settings':review.errors.find(message=>message.startsWith(`${steps.indexOf(s)+1}. `))||'';
     card.dataset.incomplete=String(incomplete.includes(s.id));
     card.querySelector('[data-step-error]').classList.toggle('configuration-pending',pending&&Object.keys(errors).length>0);
     for(const p of a.parameters){const input=$(`${s.id}-${p.name}`),error=$(`${s.id}-${p.name}-error`);const visibleError=(!pristineSteps.has(s.id)||touchedFields.has(input?.id))?errors[p.name]:'';if(input){input.classList.toggle('invalid',Boolean(visibleError));input.setAttribute('aria-invalid',String(Boolean(visibleError)));}if(error)error.textContent=visibleError||'';}
@@ -143,30 +287,48 @@ function renderPreview(){
     for(const key of ['format','path']){const field=card.querySelector(`[data-output="${key}"]`);if(field){const error=$(`${s.id}-${key}-error`);error.textContent=outputIssues[key]||'';field.setAttribute('aria-invalid',String(Boolean(outputIssues[key])));}}
     $(`${s.id}-bulk-error`).textContent=errors.bulk||errors.onError||errors.bindings||'';
     const queryErrors=resultErrors(a,s),guards=conditionErrors(s,steps.indexOf(s),steps);const query=card.querySelector('[data-results-error]');if(query)query.textContent=Object.values(queryErrors).join(' ');const guard=card.querySelector('[data-condition-error]');if(guard)guard.textContent=guards.join(' ');const sample=card.querySelector('[data-sample]');if(sample)sample.innerHTML=sampleMarkup(s,a);
-    const parameterNote=card.querySelector('[data-parameter-error]');if(parameterNote)parameterNote.textContent=parameterErrors(workspace).join(' ');
+    const parameterNote=card.querySelector('[data-parameter-error]');if(parameterNote)parameterNote.textContent=parameterErrors(effectiveWorkspace({...workspace,steps})).join(' ');
+    const contract=card.querySelector('[data-input-source-error]');if(contract)contract.textContent=[...sourceErrors(s,steps.indexOf(s),steps,workspace),...scopeErrors(s,steps.indexOf(s),steps,workspace)].join(' ');
+    const ack=card.querySelector('[data-acknowledge-scope]');if(ack)ack.checked=scopeAcknowledged(s,steps,workspace);
+    const sourceScope=card.querySelector('[data-source-scope]');if(sourceScope)sourceScope.textContent=sourceScopeText(steps[resultSourceIndex(s,steps)],workspace);
+    for(const input of card.querySelectorAll('[data-param][type="checkbox"]')){input.checked=!!effective.values[input.dataset.param];input.disabled=input.dataset.param==='whatIf'&&workspace.dryRun===true;}
+    for(const note of card.querySelectorAll('[data-behavior-origin]')){
+      const key=note.dataset.behaviorOrigin,origin=behaviorOrigin(s,key,workspace),label=({whatIf:'WhatIf',confirm:'Confirmation',verbose:'Verbose evidence',onError:'Failure handling',computer:'Computer target'})[key];
+      note.querySelector('span').textContent=label+': '+origin+(origin==='Group default'?' · Editing creates a step override':'');note.querySelector('button').hidden=!s.behaviorOverrides?.[key];
+    }
+    const behaviorContent=card.querySelector('[data-effective-behavior-content]');if(behaviorContent)behaviorContent.innerHTML=renderEffectiveBehaviorContent(s,workspace);
     updateSummary(s);
   }
+  for(const group of workspace.groups||[]){const members=steps.filter(s=>s.groupId===group.id),count=document.querySelector(`[data-workflow-group="${CSS.escape(group.id)}"] [data-group-counts]`);if(count)count.textContent=`${members.length} steps · ${members.filter(s=>['modify','disruptive'].includes(stepImpact(s,workspace))).length} modifies · ${members.filter(s=>commands.find(c=>c.id===s.actionId).report||s.output?.format&&s.output.format!=='none').length} writes files`;}
   script=invalid?'':generateScript(steps,workspace);
   if(!invalid)lastValidPreview={script,marked:generateScript(steps,{...workspace,previewMarkers:true})};
   const display=lastValidPreview?.marked||'# Configure a step to see its PowerShell here.\n';
   $('preview-stale').hidden=!invalid;
   $('preview-stale-label').textContent=lastValidPreview?'Out of date · Last valid preview':'Draft incomplete · No valid preview yet';
-  $('preview-stale').querySelector('p').textContent='Your latest changes are not reflected below. Configure incomplete steps to enable copy and download.';
+  $('preview-stale').querySelector('p').textContent=lastValidPreview?'Your latest changes are not reflected below. Configure incomplete steps to enable copy and download.':'Configure incomplete steps to create a valid preview and enable copy and download.';
   $('fix-incomplete').dataset.target=incomplete[0]||'';
   const selected=steps.find(s=>!s.collapsed);
-  $('bench-context').textContent=(selected?'Step '+(steps.indexOf(selected)+1)+' · '+commands.find(c=>c.id===selected.actionId).name:steps.length+' steps')+(invalid?' · Needs configuration':' · Ready to review');
+  $('bench-context').textContent=(selected?'Step '+(steps.indexOf(selected)+1)+' · '+commands.find(c=>c.id===selected.actionId).name:steps.length+' steps')+(invalid?' · Needs configuration':steps.length?' · Ready to export':' · Add a command');
   $('code').classList.toggle('expert-mode',workspace.viewMode==='expert');
   document.querySelectorAll('[data-view-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.viewMode===workspace.viewMode)));
   let owner='',lineNumber=0;
   $('code').innerHTML=display.trimEnd().split('\n').flatMap(line=>{const marker=line.trim().match(/^# SHELLIFY_(BEGIN|END) (.+)$/);if(marker){owner=marker[1]==='BEGIN'?marker[2]:'';return [];}return [`<div class="code-line" ${owner&&!invalid?'data-code-step="'+escape(owner)+'"':''}><span class="line-number" aria-hidden="true">${++lineNumber}</span><span>${highlight(line)||' '}</span></div>`];}).join('');
   highlightSelectedStep();
   const modifying=steps.filter(s=>['modify','disruptive'].includes(stepImpact(s,workspace))).length,previews=steps.filter(s=>stepImpact(s,workspace)==='preview').length;
-  $('script-status').textContent=invalid?'Configure incomplete steps to export':!steps.length?'＋ Add your first command':modifying?`⚠ ${modifying} system-modifying step${modifying===1?'':'s'}`:previews?`● ${previews} preview-only restart${previews===1?'':'s'} · No system changes`:`● ${steps.length} ${review.files.length?'query':'read-only'} step${steps.length===1?'':'s'} · Ready to review`;
+  $('context-title').textContent=workspace.title.trim()||'Untitled script';
+  $('context-version').textContent='PowerShell '+workspace.version;
+  $('context-scope').textContent=scriptScope({...workspace,steps});
+  $('context-scope').title=$('context-scope').textContent;
+  $('context-counts').textContent=`${steps.length} step${steps.length===1?'':'s'} · ${modifying} modifying${previews?` · ${previews} preview only`:''}`;
+  $('context-status').textContent=invalid?'Needs configuration':steps.length?'Ready to export':'Add a command';
+  $('context-status').classList.toggle('error',invalid);
+  $('context-requirements').disabled=!steps.length;
+  $('script-status').textContent=invalid?'Needs configuration · Export unavailable':!steps.length?'Add your first command':`Ready to export · ${modifying} modifying step${modifying===1?'':'s'}${previews?` · ${previews} preview only`:''}`;
   $('script-status').classList.toggle('error',invalid);$('copy').disabled=$('download').disabled=$('save-script').disabled=invalid||!steps.length;
   $('export-filename').textContent=filenameFor(workspace.filename);
   if(review.files.length&&!invalid)$('script-status').textContent+=` · Writes ${review.files.length} result file${review.files.length===1?'':'s'}`;
-  $('review-script').disabled=!steps.length;$('invocation-preview').hidden=workspace.exportMode!=='parameters';$('invocation-preview').textContent=workspace.exportMode==='parameters'?`Example invocation: ${invocation(workspace)}`:'';
-  $('shared-input-errors').textContent=[...sharedInputErrors(workspace.sharedInputs),...parameterErrors(workspace)].join(' ');
+  $('review-script').disabled=!steps.length;$('invocation-preview').hidden=workspace.exportMode!=='parameters';$('invocation-preview').textContent=workspace.exportMode==='parameters'?`Example invocation: ${invocation(effectiveWorkspace({...workspace,steps}))}`:'';
+  $('shared-input-errors').textContent=[...sharedInputErrors(workspace.sharedInputs),...parameterErrors(effectiveWorkspace({...workspace,steps}))].join(' ');
   $('logging-path-label').hidden=!workspace.logging.enabled;$('runtime-errors').textContent=runtimeErrors({...workspace,steps}).join(' ');
   $('ordering-warning').textContent=runtimeErrors({...workspace,steps}).join(' ');$('ordering-warning').hidden=!$('ordering-warning').textContent;
   const last=steps.at(-1),action=commands.find(c=>c.id===last?.actionId),related=action?.related||[],typed=commands.filter(c=>c.accepts.includes(action?.outputType)).map(c=>c.id);
@@ -176,19 +338,40 @@ $('search').addEventListener('input',()=>{renderCatalog();if(searchDebug){search
 $('categories').addEventListener('change',e=>{category=e.target.value;renderCatalog();});
 document.querySelectorAll('[data-query]').forEach(b=>b.addEventListener('click',()=>{category='All commands';$('search').value=b.dataset.query;renderCategories();renderCatalog();}));
 $('results').addEventListener('click',e=>{const favorite=e.target.closest('[data-favorite]');if(favorite){const id=favorite.dataset.favorite;discovery.favorites=discovery.favorites.includes(id)?discovery.favorites.filter(value=>value!==id):[...discovery.favorites,id];if(!saveDiscovery(storage,discovery))toast('Favorites cannot be saved while browser storage is unavailable.');renderCatalog();return;}const b=e.target.closest('[data-add]');if(!b)return;if(steps.length>=200){toast('A script can contain up to 200 steps.');return;}const a=commands.find(c=>c.id===b.dataset.add);const s=createStep(a.id);pristineSteps.add(s.id);s.collapsed=!searchAddExpanded;remember();steps.forEach(step=>step.collapsed=true);steps.push(s);trackRecent(a.id);renderSteps();if(searchAddExpanded){showPane('configure');const card=document.querySelector(`[data-step="${s.id}"]`);card.scrollIntoView({behavior:'smooth',block:'nearest'});(card.querySelector('input')||card.querySelector('button:not(:disabled)'))?.focus({preventScroll:true});}else{$('search').focus();}toast(`${a.name} added`);});
-$('steps').addEventListener('input',e=>{const input=e.target.closest('[data-param], [data-output], [data-binding], [data-execution]');if(!input)return;if(input.matches('[data-param]'))touchedFields.add(input.id);const s=steps.find(s=>s.id===input.closest('[data-step]').dataset.step);if(input.type==='checkbox'||editingInput!==input){remember();editingInput=input;}if(input.dataset.binding){s.bindings||={};if(input.value)s.bindings[input.dataset.binding]=input.value;else delete s.bindings[input.dataset.binding];renderSteps();return;}if(input.dataset.execution){const key=input.dataset.execution;if(key==='onError')s.onError=input.value;else if(key==='bulkField'){s.bulk||={field:'',targets:[]};s.bulk.field=input.value;delete s.bindings[input.value];renderSteps();return;}else{s.bulk.targets=input.value.split(/\r?\n/).map(t=>t.trim()).filter(Boolean);}}else if(input.dataset.output){s.output||={format:'none',path:''};s.output[input.dataset.output]=input.value;}else s.values[input.dataset.param]=input.type==='checkbox'?input.checked:input.value;renderPreview();persist();});
+$('steps').addEventListener('input',e=>{
+  const input=e.target.closest('[data-param],[data-output],[data-execution]');if(!input)return;
+  const step=steps.find(s=>s.id===input.closest('[data-step]').dataset.step);
+  if(input.matches('[data-param]'))touchedFields.add(input.id);
+  const key=input.dataset.execution?'onError':input.dataset.param;
+  if(step.groupId&&['whatIf','confirm'].includes(key)){
+    const after=cloneCurrentWorkspace(),changed=after.steps.find(s=>s.id===step.id);changed.values[key]=input.checked;changed.behaviorOverrides||={};changed.behaviorOverrides[key]=true;
+    const proposal=planBehaviorChange({...workspace,steps},after,'Review step override',[step.id]);
+    if(proposal.requiresAcknowledgement){input.checked=effectiveStep(step,workspace).values[key]===true;stageBehaviorChange(after,'Review step override',[step.id]);return;}
+  }
+  if(input.type==='checkbox'||editingInput!==input){remember();editingInput=input;}
+  if(['whatIf','confirm','verbose','onError','computer'].includes(key)){step.behaviorOverrides||={};step.behaviorOverrides[key]=true;}
+  if(input.dataset.execution)step.onError=input.value;
+  else if(input.dataset.output){step.output||={format:'none',path:''};step.output[input.dataset.output]=input.value;}
+  else step.values[input.dataset.param]=input.type==='checkbox'?input.checked:input.value;
+  renderPreview();persist();
+});
 $('steps').addEventListener('focusout',e=>{editingInput=null;if(e.target.matches('[data-param]')){touchedFields.add(e.target.id);renderPreview();}});
 $('steps').addEventListener('click',e=>{
   const b=e.target.closest('[data-move], [data-remove], [data-duplicate], [data-reset], [data-collapse], [data-focus-step]');if(!b)return;
   const id=b.closest('[data-step]').dataset.step,index=steps.findIndex(s=>s.id===id),step=steps[index];
   if(b.hasAttribute('data-collapse')){const opening=step.collapsed;steps.forEach(s=>s.collapsed=opening?s.id!==id:true);renderSteps();document.querySelector(`[data-step="${id}"] [data-collapse]`)?.focus({preventScroll:true});return;}
   if(b.hasAttribute('data-duplicate')&&steps.length>=200){toast('A script can contain up to 200 steps.');return;}
-  remember();const oldIds=steps.map(s=>s.id);
+  if(b.hasAttribute('data-reset')&&step.groupId){
+    const after=cloneCurrentWorkspace(),reset=after.steps.find(s=>s.id===id),groupId=reset.groupId;
+    Object.assign(reset,createStep(step.actionId),{id,groupId});delete reset.results;delete reset.inputSourceId;delete reset.inputStep;delete reset.scopeAcknowledgement;
+    stageBehaviorChange(after,'Review step defaults',[id]);return;
+  }
+  remember();
   if(b.hasAttribute('data-remove')){steps.splice(index,1);toast('Step removed. Use Undo to restore it.');}
-  else if(b.hasAttribute('data-duplicate')){steps.forEach(s=>s.collapsed=true);steps.splice(index+1,0,{...copy(step),id:crypto.randomUUID(),collapsed:false});toast('Step duplicated');}
-  else if(b.hasAttribute('data-reset')){steps.forEach(s=>s.collapsed=s.id!==id);step.values=defaults(commands.find(c=>c.id===step.actionId));step.output={format:'none',path:''};step.bindings={};step.bulk={field:'',targets:[]};step.onError='stop';delete step.results;step.condition={type:'none',sourceStep:-1};step.parameterFields={};step.collapsed=false;toast('Step reset. Use Undo to restore your settings.');}
+  else if(b.hasAttribute('data-duplicate')){steps.forEach(s=>s.collapsed=true);const duplicate={...copy(step),id:crypto.randomUUID(),collapsed:false};delete duplicate.scopeAcknowledgement;steps.splice(index+1,0,duplicate);toast('Step duplicated');}
+  else if(b.hasAttribute('data-reset')){steps.forEach(s=>s.collapsed=s.id!==id);step.values=defaults(commands.find(c=>c.id===step.actionId));step.output={format:'none',path:''};step.bindings={};step.bulk={field:'',targets:[]};step.onError='stop';delete step.results;step.condition={type:'none'};step.parameterFields={};step.behaviorOverrides={};step.collapsed=false;delete step.inputSourceId;delete step.inputStep;delete step.scopeAcknowledgement;toast('Step reset. Use Undo to restore your settings.');}
   else{const other=index+Number(b.dataset.move);if(other<0||other>=steps.length)return;if(step.groupId!==steps[other].groupId&&(step.groupId||steps[other].groupId)){toast('Use the workflow group arrows to move between groups.');return;}[steps[index],steps[other]]=[steps[other],steps[index]];}
-  for(const s of steps){if(s.inputStep!==undefined&&s.inputStep!==-1){s.inputStep=steps.findIndex(item=>item.id===oldIds[s.inputStep]);if(s.inputStep===-1)s.inputStep=-2;}}for(const s of steps)if(s.condition?.type==='connectivity')s.condition.sourceStep=steps.findIndex(item=>item.id===oldIds[s.condition.sourceStep]);
+
   renderSteps();
   const focusId=b.hasAttribute('data-duplicate')?steps[index+1].id:b.hasAttribute('data-remove')?steps[Math.min(index,steps.length-1)]?.id:id;
   const focusButton=document.querySelector(`[data-step="${focusId}"] [data-collapse]`);
@@ -210,7 +393,10 @@ for(const [id,key] of [['preflight','preflight'],['execution-summary','execution
   $(id).addEventListener('input',e=>{if(e.target.type==='checkbox'||editingInput!==e.target){remember();editingInput=e.target;}const value=e.target.type==='checkbox'?e.target.checked:e.target.value;if(key==='enabled'||key==='path')workspace.logging[key]=value;else workspace[key]=value;renderPreview();persist();});
   $(id).addEventListener('focusout',()=>editingInput=null);
 }
-$('options-button').addEventListener('click',()=>$('script-options').showModal());
+function openScriptOptions(){$('dry-run').checked=workspace.dryRun===true;$('reachable-only').checked=workspace.reachableOnly!==false;$('fleet-targets').value=(workspace.targets||[]).join('\n');$('script-options').showModal();}
+$('options-button').addEventListener('click',openScriptOptions);
+$('context-edit').addEventListener('click',()=>{openScriptOptions();$('script-title').focus();});
+$('context-requirements').addEventListener('click',()=>{renderReview();$('script-review').showModal();});
 $('close-options').addEventListener('click',()=>$('script-options').close());
 let library=readLibrary(storage).items;
 function renderLibrary(){
@@ -282,7 +468,7 @@ $('import-project').addEventListener('change',async e=>{
 function renderReview(){
   const review=reviewWorkspace(workspace);
   const list=(items,empty)=>items.length?`<ul>${items.map(value=>`<li>${escape(value)}</li>`).join('')}</ul>`:`<p class="dialog-help">${empty}</p>`;
-  $('review-content').innerHTML=`<p class="dialog-help">${workspace.exportMode==='parameters'?'Parameterized strings; see the example invocation.':'Embedded values.'} Target: PowerShell ${escape(workspace.version)} on Windows. Shellify never runs this script.</p>${review.errors.length?`<div class="risk-note"><strong>Blocking problems</strong>${list(review.errors,'')}</div>`:''}<h3>Run options</h3><p class="dialog-help">${workspace.preflight?'Preflight checks enabled.':'Preflight checks disabled.'} ${workspace.executionSummary?'Execution summary enabled.':'Execution summary disabled.'} ${workspace.logging.enabled?`Transcript: ${escape(workspace.logging.path)}`:'Logging disabled.'}</p><h3>Required modules</h3>${list(review.modules,'Uses built-in PowerShell commands; no additional module imports.')}<h3>Remote & network targets</h3>${list(review.targets,'Commands target the current computer.')}<h3>System changes</h3>${list(review.modifying,'No system-modifying commands.')}${review.previews.length?`<h3>Preview-only actions</h3>${list(review.previews,'')}`:''}<h3>Result files</h3>${list(review.files.map(item=>`${item.label}: ${item.format.toUpperCase()} → ${item.path}`),'Results display in PowerShell; no result files are written.')}${review.files.length?'<p class="dialog-help">Requires write permission to existing destination folders. Existing files are not overwritten.</p>':''}<h3>Steps, targets & error handling</h3>${steps.map((step,index)=>{const a=commands.find(c=>c.id===step.actionId),v=resolveStep(step,workspace.sharedInputs).values;for(const d of parameterDefinitions(workspace))for(const use of d.uses)if(use.index===index)v[use.field]='Runtime parameter: '+d.name;return `<div class="review-step"><button class="text-button" data-review-step="${index}">Edit step ${index+1}: ${escape(a.name)}</button><p>${v.computer?`Remote computer: ${escape(v.computer)}`:a.category==='Active Directory'?`Directory query: ${escape(v.server||'current domain')}`:`Runs locally${v.host?`; network destination: ${escape(v.host)}`:''}`} · ${step.onError==='continue'?'Record errors and continue':'Stop on error'}${step.bulk?.field?` · Bulk ${escape(step.bulk.field)}: ${step.bulk.targets.map(escape).join(', ')}`:''}${step.condition?.type&&step.condition.type!=='none'?` · Condition: ${escape(step.condition.type)}${step.condition.type==='connectivity'?` from step ${step.condition.sourceStep+1}`:''}`:''}</p></div>`;}).join('')}<h3>Informational requirements & permissions</h3>${review.permissions.map(item=>`<div class="review-permission"><strong>${escape(item.label)}</strong><p>${escape(item.requirements)}</p></div>`).join('')}`;
+  $('review-content').innerHTML=`<p class="dialog-help">${workspace.exportMode==='parameters'?'Parameterized strings; see the example invocation.':'Embedded values.'} Target: PowerShell ${escape(workspace.version)} on Windows. Shellify never runs this script. Requirements to review: permissions, modules, and targets have not been checked in your environment.</p>${review.errors.length?`<div class="risk-note"><strong>Blocking problems</strong>${list(review.errors,'')}</div>`:''}<h3>Run options</h3><p class="dialog-help">${workspace.preflight?'Preflight checks enabled.':'Preflight checks disabled.'} ${workspace.executionSummary?'Execution summary enabled.':'Execution summary disabled.'} ${workspace.logging.enabled?`Transcript: ${escape(workspace.logging.path)}`:'Logging disabled.'}</p><h3>Required modules</h3>${list(review.modules,'Uses built-in PowerShell commands; no additional module imports.')}<h3>Configured scope</h3><p class="dialog-help">${escape(scriptScope(workspace))}</p><h3>Configured target values</h3>${list([...(workspace.targets||[]).map(target=>`Fleet computer: ${target}`),...review.targets],'No explicit remote or network target values.')}<h3>System changes</h3>${list(review.modifying,'No system-modifying commands.')}${review.previews.length?`<h3>Preview-only actions</h3>${list(review.previews,'')}`:''}<h3>Result files</h3>${list(review.files.map(item=>`${item.label}: ${item.format.toUpperCase()} → ${item.path}`),'Results display in PowerShell; no result files are written.')}${review.files.length?'<p class="dialog-help">Requires write permission to existing destination folders. Existing files are not overwritten.</p>':''}<h3>Steps, targets & error handling</h3>${steps.map((step,index)=>{const a=commands.find(c=>c.id===step.actionId),v=resolveStep(effectiveStep(step,workspace),workspace.sharedInputs).values;for(const d of parameterDefinitions(effectiveWorkspace(workspace)))for(const use of d.uses)if(use.index===index)v[use.field]='Runtime parameter: '+d.name;return `<div class="review-step"><button class="text-button" data-review-step="${index}">Edit step ${index+1}: ${escape(a.name)}</button><p>${v.computer?`Remote computer: ${escape(v.computer)}`:a.category==='Active Directory'?`Directory query: ${escape(v.server||'current domain')}`:workspace.targets?.length&&a.remote&&!a.report?'Runs on configured fleet targets':`Runs locally${v.host?`; network destination: ${escape(v.host)}`:''}`} · ${effectiveStep(step,workspace).onError==='continue'?'Record errors and continue':'Stop on error'}${step.bulk?.field?` · Bulk ${escape(step.bulk.field)}: ${step.bulk.targets.map(escape).join(', ')}`:''}${step.condition?.type&&step.condition.type!=='none'?` · Condition: ${escape(step.condition.type)}${step.condition.type==='connectivity'?` from step ${conditionSourceIndex(step,steps)+1}`:''}`:''}</p></div>`;}).join('')}<h3>Informational requirements & permissions</h3>${review.permissions.map(item=>`<div class="review-permission"><strong>${escape(item.label)}</strong><p>${escape(item.requirements)}</p></div>`).join('')}`;
 }
 $('review-script').addEventListener('click',()=>{renderReview();$('script-review').showModal();});
 $('close-review').addEventListener('click',()=>$('script-review').close());
@@ -349,7 +535,7 @@ $('steps').addEventListener('input',e=>{
   if(input.hasAttribute('data-result-field')){step.results=settingsFor(action,step);step.results.fields=input.checked?[...step.results.fields,input.dataset.resultField]:step.results.fields.filter(f=>f!==input.dataset.resultField);}
   else if(input.hasAttribute('data-result')){step.results=settingsFor(action,step);step.results[input.dataset.result]=input.type==='checkbox'?input.checked:input.value;}
   else if(input.hasAttribute('data-filter')){step.results=settingsFor(action,step);const filter=step.results.filters[Number(input.closest('[data-filter-index]').dataset.filterIndex)];filter[input.dataset.filter]=input.value;if(input.dataset.filter==='field'){filter.operator=operators(schemaFor(action,step.values).fields.find(f=>f.name===input.value).type)[0];rerender=true;}}
-  else if(input.hasAttribute('data-condition')){step.condition||={type:'none',sourceStep:-1};step.condition[input.dataset.condition]=input.dataset.condition==='sourceStep'?Number(input.value):input.value;rerender=true;}
+  else if(input.hasAttribute('data-condition')){step.condition||={type:'none'};step.condition[input.dataset.condition]=input.value;delete step.condition.sourceStep;rerender=true;}
   else {const field=input.closest('[data-parameter-field]').dataset.parameterField;step.parameterFields||={};step.parameterFields[field]||={enabled:false,name:({host:'ComputerName',computer:'RemoteComputer',service:'ServiceName',path:'FolderPath',identity:'AccountIdentity',group:'GroupName',server:'ServerName',adapter:'AdapterName'}[field]||field[0].toUpperCase()+field.slice(1)),required:true};step.parameterFields[field][input.dataset.stepParameter]=input.type==='checkbox'?input.checked:input.value;rerender=input.dataset.stepParameter==='enabled';}
   if(rerender)renderSteps();else{renderPreview();persist();}
 });
@@ -371,13 +557,19 @@ renderLayout();
 const entry=new URLSearchParams(location.search),workflowEntry=entry.get('workflow');if(workflows.some(w=>w.id===workflowEntry)){addWorkflow(workflowEntry);window.history.replaceState(null,'',location.pathname);}else if(entry.get('category')){category=commands.some(c=>c.category===entry.get('category'))?entry.get('category'):'All commands';renderCategories();renderCatalog();}
 
 $('add-step').addEventListener('click',()=>{showPane('discover');$('search').focus();});
-$('steps').addEventListener('input',e=>{const input=e.target.closest('[data-source-step]');if(!input)return;const step=steps.find(s=>s.id===input.closest('[data-step]').dataset.step);remember();step.inputStep=Number(input.value);delete step.bindings.service;renderSteps();});
-$('next-steps').addEventListener('click',e=>{const b=e.target.closest('[data-next]');if(!b)return;const action=commands.find(c=>c.id===b.dataset.next);if(steps.length>=200){toast('A script can contain up to 200 steps.');return;}remember();steps.forEach(s=>s.collapsed=true);const step=createStep(action.id);if(action.id==='start-service'&&commands.find(c=>c.id===steps.at(-1)?.actionId)?.outputType==='services')step.inputStep=steps.length-1;steps.push(step);renderSteps();document.querySelector(`[data-step="${step.id}"]`).scrollIntoView({block:'nearest'});});
-for(const [id,key] of [['dry-run','dryRun'],['reachable-only','reachableOnly'],['fleet-targets','targets']])$(id).addEventListener('input',e=>{remember();workspace[key]=id==='fleet-targets'?e.target.value.split(/[,\r\n]+/).map(s=>s.trim()).filter(Boolean):e.target.checked;renderPreview();persist();});
-$('options-button').addEventListener('click',()=>{$('dry-run').checked=workspace.dryRun===true;$('reachable-only').checked=workspace.reachableOnly!==false;$('fleet-targets').value=(workspace.targets||[]).join('\n');});
+
+$('next-steps').addEventListener('click',e=>{const b=e.target.closest('[data-next]');if(!b)return;const action=commands.find(c=>c.id===b.dataset.next);if(steps.length>=200){toast('A script can contain up to 200 steps.');return;}remember();steps.forEach(s=>s.collapsed=true);const step=createStep(action.id);steps.push(step);renderSteps();document.querySelector(`[data-step="${step.id}"]`).scrollIntoView({block:'nearest'});});
+for(const [id,key] of [['dry-run','dryRun'],['reachable-only','reachableOnly'],['fleet-targets','targets']])$(id).addEventListener('input',e=>{
+  if(id==='dry-run'&&!e.target.checked&&steps.some(s=>s.groupId)){
+    const after=cloneCurrentWorkspace();after.dryRun=false;
+    if(planBehaviorChange({...workspace,steps},after,'Review script-wide dry run',steps.map(s=>s.id)).requiresAcknowledgement){e.target.checked=workspace.dryRun;stageBehaviorChange(after,'Review script-wide dry run',steps.map(s=>s.id));return;}
+  }
+  remember();workspace[key]=id==='fleet-targets'?e.target.value.split(/[,\r\n]+/).map(s=>s.trim()).filter(Boolean):e.target.checked;renderPreview();persist();
+});
+
 document.addEventListener('click',async e=>{const example=e.target.closest('[data-search-example]');if(example){$('search').value=example.dataset.searchExample;renderCatalog();$('search').focus();}if(e.target.closest('[data-reset-search]')){category='All commands';collection='all';$('search').value='';renderCategories();renderCatalog();}const workflow=e.target.closest('[data-search-workflow]');if(workflow)addWorkflow(workflow.dataset.searchWorkflow);if(e.target.closest('[data-copy-search]')){try{await navigator.clipboard.writeText($('search').value);toast('Search copied. Nothing was sent.');}catch{toast('Clipboard unavailable; select and copy your search.');}}if(e.target.closest('[data-add],[data-search-workflow]')){const query=$('search').value.trim();if(query){searchHistory=[query,...searchHistory.filter(s=>s!==query)].slice(0,8);try{localStorage.setItem('shellify.searches',JSON.stringify(searchHistory));}catch{}}}});
 $('search').addEventListener('keydown',e=>{const results=[...$('results').querySelectorAll('[data-add],[data-search-workflow]')];if(e.key==='Escape'){e.preventDefault();$('search').value='';renderCatalog();return;}if(['ArrowDown','ArrowUp'].includes(e.key)&&results.length){e.preventDefault();activeResult=(activeResult+(e.key==='ArrowDown'?1:-1)+results.length)%results.length;results.forEach((b,i)=>b.classList.toggle('keyboard-active',i===activeResult));$('search').setAttribute('aria-activedescendant',results[activeResult].id);results[activeResult].scrollIntoView({block:'nearest'});}if(e.key==='Enter'&&results.length){e.preventDefault();searchAddExpanded=e.shiftKey;try{results[Math.max(0,activeResult)].click();}finally{searchAddExpanded=true;}}});
-$('steps').addEventListener('click',e=>{const button=e.target.closest('[data-group-collapse],[data-group-remove],[data-group-move]');if(!button)return;const id=button.closest('[data-workflow-group]').dataset.workflowGroup,group=workspace.groups.find(g=>g.id===id);if(button.hasAttribute('data-group-collapse')){group.collapsed=!group.collapsed;renderSteps();return;}remember();const oldIds=steps.map(s=>s.id),members=steps.filter(s=>s.groupId===id),start=steps.findIndex(s=>s.groupId===id);if(button.hasAttribute('data-group-remove')){steps=steps.filter(s=>s.groupId!==id);workspace.steps=steps;workspace.groups=workspace.groups.filter(g=>g.id!==id);}else{const direction=Number(button.dataset.groupMove),neighbor=steps[direction<0?start-1:start+members.length];if(!neighbor)return;const adjacent=neighbor.groupId?steps.filter(s=>s.groupId===neighbor.groupId):[neighbor],index=direction<0?start-adjacent.length:start;steps.splice(index,members.length+adjacent.length,...(direction<0?[...members,...adjacent]:[...adjacent,...members]));}for(const s of steps){if(s.inputStep!==undefined&&s.inputStep!==-1){s.inputStep=steps.findIndex(item=>item.id===oldIds[s.inputStep]);if(s.inputStep===-1)s.inputStep=-2;}}for(const s of steps)if(s.condition?.type==='connectivity')s.condition.sourceStep=steps.findIndex(item=>item.id===oldIds[s.condition.sourceStep]);renderSteps();});
+$('steps').addEventListener('click',e=>{const button=e.target.closest('[data-group-collapse],[data-group-remove],[data-group-move]');if(!button)return;const id=button.closest('[data-workflow-group]').dataset.workflowGroup,group=workspace.groups.find(g=>g.id===id);if(button.hasAttribute('data-group-collapse')){group.collapsed=!group.collapsed;renderSteps();return;}remember();const members=steps.filter(s=>s.groupId===id),start=steps.findIndex(s=>s.groupId===id);if(button.hasAttribute('data-group-remove')){steps=steps.filter(s=>s.groupId!==id);workspace.steps=steps;workspace.groups=workspace.groups.filter(g=>g.id!==id);}else{const direction=Number(button.dataset.groupMove),neighbor=steps[direction<0?start-1:start+members.length];if(!neighbor)return;const adjacent=neighbor.groupId?steps.filter(s=>s.groupId===neighbor.groupId):[neighbor],index=direction<0?start-adjacent.length:start;steps.splice(index,members.length+adjacent.length,...(direction<0?[...members,...adjacent]:[...adjacent,...members]));}renderSteps();});
 document.querySelectorAll('.settings-popover button').forEach(b=>b.addEventListener('click',()=>document.querySelector('.settings-menu').open=false));
 document.querySelectorAll('[data-starter]').forEach(b=>b.addEventListener('click',()=>{category='All commands';collection='all';$('search').value='';renderCategories();renderCatalog();document.querySelector(`[data-add="${b.dataset.starter}"]`).click();}));
 document.addEventListener('click',e=>{document.querySelectorAll('.settings-menu[open],.step-menu[open]').forEach(menu=>{if(!menu.contains(e.target))menu.open=false;});});

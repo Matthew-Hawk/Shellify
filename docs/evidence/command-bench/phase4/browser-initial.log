@@ -1,0 +1,234 @@
+
+> test:browser
+> playwright test
+
+[WebServer] (node:37284) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 138 tests using 1 worker
+
+(node:35208) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok   1 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: landing (1.2s)
+  ok   2 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: landing motion enabled (1.0s)
+  ok   3 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: landing Files example (1.0s)
+  ok   4 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: landing Directory example (1.1s)
+  ok   5 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: builder search results (2.2s)
+  ok   6 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: landing FAQ (1.0s)
+  ok   7 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: builder discover (3.3s)
+  ok   8 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: descriptive catalog (3.3s)
+  ok   9 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: catalog end (3.2s)
+  ok  10 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: builder configure (3.2s)
+  ok  11 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: builder preview (3.1s)
+  ok  12 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: settings menu (3.3s)
+  ok  13 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: step actions menu (3.3s)
+  ok  14 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: search tips (3.2s)
+  ok  15 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: guide dialog (1.8s)
+  ok  16 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: script settings dialog (2.6s)
+  ok  17 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: script library dialog (3.2s)
+  ok  18 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: shared inputs dialog (1.8s)
+  ok  19 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: shared parameter inputs dialog (2.2s)
+  ok  20 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: script review dialog (2.2s)
+  ok  21 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: workflow inputs dialog (1.8s)
+  ok  22 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: expanded step controls (7.8s)
+  ok  23 [desktop] › browser-tests\accessibility.spec.js:51:40 › accessibility: step parameter controls (5.5s)
+  ok  24 [desktop] › browser-tests\bench-clarity.spec.js:9:1 › persistent context follows editing, target changes, removal, undo and draft reload (1.2s)
+  ok  25 [desktop] › browser-tests\bench-clarity.spec.js:28:1 › context settings reflect fleet values and invalid edits preserve recovery and export gates (1.5s)
+  ok  26 [desktop] › browser-tests\bench-clarity.spec.js:42:1 › long identity, targets and titles reflow with compact controls at all review sizes (12.4s)
+  ok  27 [desktop] › browser-tests\builder.spec.js:10:1 › guide reopens with motion and respects pause and reduced motion (1.1s)
+  ok  28 [desktop] › browser-tests\builder.spec.js:21:1 › autosave, duplicate, collapse, reset and Undo retain independent steps (1.8s)
+  ok  29 [desktop] › browser-tests\builder.spec.js:34:1 › favorites and flag search persist after refresh (1.2s)
+  ok  30 [desktop] › browser-tests\builder.spec.js:40:1 › imports are atomic and undoable (1.0s)
+  ok  31 [desktop] › browser-tests\builder.spec.js:47:1 › expert mode removes comments from preview, clipboard and download (1.2s)
+  ok  32 [desktop] › browser-tests\builder.spec.js:56:1 › saved scripts update, rename and restore the previous contents (1.3s)
+  ok  33 [desktop] › browser-tests\builder.spec.js:65:1 › shared inputs and bulk targets generate labeled loops with continuation (1.3s)
+  ok  34 [desktop] › browser-tests\builder.spec.js:75:1 › CSV validation disables export until a destination is set (618ms)
+  ok  35 [desktop] › browser-tests\builder.spec.js:79:1 › runtime settings persist, log validation blocks export and help is available (1.3s)
+  ok  36 [desktop] › browser-tests\command-bench.spec.js:8:1 › inspect commands without adding and keep keyboard insertion fast (756ms)
+  ok  37 [desktop] › browser-tests\command-bench.spec.js:22:1 › incomplete steps retain the last valid preview and block export until corrected (959ms)
+  ok  38 [desktop] › browser-tests\command-bench.spec.js:41:1 › bench keeps identity, motion, selected code and responsive containment (886ms)
+  ok  39 [desktop] › browser-tests\command-bench.spec.js:53:1 › bench accessibility covers inspection, stale output and mobile preview (4.6s)
+  ok  40 [desktop] › browser-tests\command-bench.spec.js:62:121 › library backdrop dismisses on either side after scrolling without dismissing inside clicks (886ms)
+  ok  41 [desktop] › browser-tests\command-bench.spec.js:62:121 › guide backdrop dismisses on either side after scrolling without dismissing inside clicks (837ms)
+  ok  42 [desktop] › browser-tests\composition-contracts.spec.js:13:1 › one input source owns mapping and broad scope gates export, invalidates and recovers (5.6s)
+  ok  43 [desktop] › browser-tests\composition-contracts.spec.js:40:1 › reorder, source deletion, Undo, required field edits and removal stay repairable (2.5s)
+  ok  44 [desktop] › browser-tests\composition-contracts.spec.js:57:1 › collapsed groups retain inspectable links and condition, shared and report relationships stay distinct (3.7s)
+  ok  45 [desktop] › browser-tests\enhancements.spec.js:4:1 › workflow insertion shares values and Undo restores the current draft (742ms)
+  ok  46 [desktop] › browser-tests\enhancements.spec.js:8:1 › result fields, filters, sorting and illustrative samples follow configuration (1.2s)
+  ok  47 [desktop] › browser-tests\enhancements.spec.js:14:1 › explicit restart targets, advanced conditions and review jump are usable (976ms)
+  ok  48 [desktop] › browser-tests\enhancements.spec.js:18:1 › parameterized folder export and keyboard panel settings preserve layout (1.3s)
+  ok  49 [desktop] › browser-tests\enhancements.spec.js:23:1 › home task links insert the corresponding workflow once (1.0s)
+  ok  50 [desktop] › browser-tests\group-behavior.spec.js:12:1 › presets review before live changes, preserve drafts on cancel, apply and Undo with visible origins (2.7s)
+  ok  51 [desktop] › browser-tests\group-behavior.spec.js:24:1 › shared targeting, explicit overrides, reset and membership changes are reviewed and revalidated (1.6s)
+  ok  52 [desktop] › browser-tests\group-behavior.spec.js:31:1 › unsupported group preview blocks exports and group dialogs reflow with honest capability labels (7.9s)
+  x   53 [desktop] › browser-tests\group-behavior.spec.js:41:1 › script dry run wins over group settings and removal needs a live-change review (1.2s)
+(node:19392) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  54 [desktop] › browser-tests\landing.spec.js:6:1 › examples show real commands and support guided/expert switching (721ms)
+  ok  55 [desktop] › browser-tests\landing.spec.js:14:1 › pause control stops decorative animation and reduced motion disables it (1.4s)
+  ok  56 [desktop] › browser-tests\landing.spec.js:21:1 › FAQ and primary navigation work without horizontal overflow (808ms)
+  ok  57 [desktop] › browser-tests\landing.spec.js:29:1 › home entrance completes and reduced motion keeps content visible (2.6s)
+  ok  58 [desktop] › browser-tests\share.spec.js:13:1 › share link round trip restores the portable project and supports Undo (1.6s)
+  ok  59 [desktop] › browser-tests\share.spec.js:50:1 › malicious and oversized hashes show errors without replacing the draft (2.6s)
+  ok  60 [desktop] › browser-tests\share.spec.js:77:1 › oversized projects cannot create share links (3.3s)
+  ok  61 [desktop] › browser-tests\sysadmin.spec.js:4:1 › typos, identifiers, filters and keyboard search add the intended step (705ms)
+  ok  62 [desktop] › browser-tests\sysadmin.spec.js:13:1 › workflow inputs bind once, groups collapse and removal is undoable (1.4s)
+  ok  63 [desktop] › browser-tests\sysadmin.spec.js:22:1 › fleet certificate sweep captures report and settings survive refresh (1.0s)
+  ok  64 [desktop] › browser-tests\sysadmin.spec.js:27:1 › typed service results and dry run generate a bounded verified change (1.3s)
+  ok  65 [desktop] › browser-tests\sysadmin.spec.js:33:1 › zero results offer recovery and debug diagnostics stay local (808ms)
+  ok  66 [desktop] › browser-tests\ux.spec.js:5:1 › one step stays open while invalid collapsed steps remain visible and reviewable (1.0s)
+  ok  67 [desktop] › browser-tests\ux.spec.js:18:1 › fresh script confirmation can cancel and the footer sits below the workspace (664ms)
+  ok  68 [desktop] › browser-tests\ux.spec.js:27:1 › desktop dividers drag, persist and reset without covering panel controls (942ms)
+  ok  69 [desktop] › browser-tests\ux.spec.js:37:1 › keyboard search adds steps and workspace fits desktop, laptop and phone (686ms)
+(node:41756) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  70 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: landing (1.2s)
+  ok  71 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: landing motion enabled (1.0s)
+  ok  72 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: landing Files example (1.0s)
+  ok  73 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: landing Directory example (1.0s)
+  ok  74 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: builder search results (1.2s)
+  ok  75 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: landing FAQ (984ms)
+  ok  76 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: builder discover (1.6s)
+  ok  77 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: descriptive catalog (1.8s)
+  ok  78 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: catalog end (1.7s)
+  ok  79 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: builder configure (2.0s)
+  ok  80 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: builder preview (1.2s)
+  ok  81 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: settings menu (1.8s)
+  ok  82 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: step actions menu (1.9s)
+  ok  83 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: search tips (1.6s)
+  ok  84 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: guide dialog (1.0s)
+  ok  85 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: script settings dialog (2.4s)
+  ok  86 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: script library dialog (3.0s)
+  ok  87 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: shared inputs dialog (1.2s)
+  ok  88 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: shared parameter inputs dialog (1.4s)
+  ok  89 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: script review dialog (1.7s)
+  ok  90 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: workflow inputs dialog (1.1s)
+  ok  91 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: expanded step controls (5.8s)
+  ok  92 [mobile] › browser-tests\accessibility.spec.js:51:40 › accessibility: step parameter controls (4.8s)
+  ok  93 [mobile] › browser-tests\bench-clarity.spec.js:9:1 › persistent context follows editing, target changes, removal, undo and draft reload (1.3s)
+  ok  94 [mobile] › browser-tests\bench-clarity.spec.js:28:1 › context settings reflect fleet values and invalid edits preserve recovery and export gates (1.5s)
+  ok  95 [mobile] › browser-tests\bench-clarity.spec.js:42:1 › long identity, targets and titles reflow with compact controls at all review sizes (8.5s)
+  ok  96 [mobile] › browser-tests\builder.spec.js:10:1 › guide reopens with motion and respects pause and reduced motion (834ms)
+  ok  97 [mobile] › browser-tests\builder.spec.js:21:1 › autosave, duplicate, collapse, reset and Undo retain independent steps (1.4s)
+  ok  98 [mobile] › browser-tests\builder.spec.js:34:1 › favorites and flag search persist after refresh (672ms)
+  ok  99 [mobile] › browser-tests\builder.spec.js:40:1 › imports are atomic and undoable (586ms)
+  ok 100 [mobile] › browser-tests\builder.spec.js:47:1 › expert mode removes comments from preview, clipboard and download (960ms)
+  ok 101 [mobile] › browser-tests\builder.spec.js:56:1 › saved scripts update, rename and restore the previous contents (1.1s)
+  ok 102 [mobile] › browser-tests\builder.spec.js:65:1 › shared inputs and bulk targets generate labeled loops with continuation (1.3s)
+  ok 103 [mobile] › browser-tests\builder.spec.js:75:1 › CSV validation disables export until a destination is set (684ms)
+  ok 104 [mobile] › browser-tests\builder.spec.js:79:1 › runtime settings persist, log validation blocks export and help is available (1.1s)
+  ok 105 [mobile] › browser-tests\command-bench.spec.js:8:1 › inspect commands without adding and keep keyboard insertion fast (721ms)
+  ok 106 [mobile] › browser-tests\command-bench.spec.js:22:1 › incomplete steps retain the last valid preview and block export until corrected (1.0s)
+  ok 107 [mobile] › browser-tests\command-bench.spec.js:41:1 › bench keeps identity, motion, selected code and responsive containment (733ms)
+  ok 108 [mobile] › browser-tests\command-bench.spec.js:53:1 › bench accessibility covers inspection, stale output and mobile preview (3.5s)
+  ok 109 [mobile] › browser-tests\command-bench.spec.js:62:121 › library backdrop dismisses on either side after scrolling without dismissing inside clicks (759ms)
+  ok 110 [mobile] › browser-tests\command-bench.spec.js:62:121 › guide backdrop dismisses on either side after scrolling without dismissing inside clicks (755ms)
+  ok 111 [mobile] › browser-tests\composition-contracts.spec.js:13:1 › one input source owns mapping and broad scope gates export, invalidates and recovers (4.9s)
+  ok 112 [mobile] › browser-tests\composition-contracts.spec.js:40:1 › reorder, source deletion, Undo, required field edits and removal stay repairable (2.2s)
+  ok 113 [mobile] › browser-tests\composition-contracts.spec.js:57:1 › collapsed groups retain inspectable links and condition, shared and report relationships stay distinct (3.4s)
+  ok 114 [mobile] › browser-tests\enhancements.spec.js:4:1 › workflow insertion shares values and Undo restores the current draft (810ms)
+  ok 115 [mobile] › browser-tests\enhancements.spec.js:8:1 › result fields, filters, sorting and illustrative samples follow configuration (1.2s)
+  ok 116 [mobile] › browser-tests\enhancements.spec.js:14:1 › explicit restart targets, advanced conditions and review jump are usable (1.0s)
+  ok 117 [mobile] › browser-tests\enhancements.spec.js:18:1 › parameterized folder export and keyboard panel settings preserve layout (1.2s)
+  ok 118 [mobile] › browser-tests\enhancements.spec.js:23:1 › home task links insert the corresponding workflow once (953ms)
+  ok 119 [mobile] › browser-tests\group-behavior.spec.js:12:1 › presets review before live changes, preserve drafts on cancel, apply and Undo with visible origins (2.6s)
+  ok 120 [mobile] › browser-tests\group-behavior.spec.js:24:1 › shared targeting, explicit overrides, reset and membership changes are reviewed and revalidated (1.6s)
+  ok 121 [mobile] › browser-tests\group-behavior.spec.js:31:1 › unsupported group preview blocks exports and group dialogs reflow with honest capability labels (7.8s)
+  x  122 [mobile] › browser-tests\group-behavior.spec.js:41:1 › script dry run wins over group settings and removal needs a live-change review (1.2s)
+(node:32056) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 123 [mobile] › browser-tests\landing.spec.js:6:1 › examples show real commands and support guided/expert switching (652ms)
+  ok 124 [mobile] › browser-tests\landing.spec.js:14:1 › pause control stops decorative animation and reduced motion disables it (1.4s)
+  ok 125 [mobile] › browser-tests\landing.spec.js:21:1 › FAQ and primary navigation work without horizontal overflow (707ms)
+  ok 126 [mobile] › browser-tests\landing.spec.js:29:1 › home entrance completes and reduced motion keeps content visible (2.5s)
+  ok 127 [mobile] › browser-tests\share.spec.js:13:1 › share link round trip restores the portable project and supports Undo (1.4s)
+  ok 128 [mobile] › browser-tests\share.spec.js:50:1 › malicious and oversized hashes show errors without replacing the draft (2.3s)
+  ok 129 [mobile] › browser-tests\share.spec.js:77:1 › oversized projects cannot create share links (2.7s)
+  ok 130 [mobile] › browser-tests\sysadmin.spec.js:4:1 › typos, identifiers, filters and keyboard search add the intended step (728ms)
+  ok 131 [mobile] › browser-tests\sysadmin.spec.js:13:1 › workflow inputs bind once, groups collapse and removal is undoable (1.3s)
+  ok 132 [mobile] › browser-tests\sysadmin.spec.js:22:1 › fleet certificate sweep captures report and settings survive refresh (1.1s)
+  ok 133 [mobile] › browser-tests\sysadmin.spec.js:27:1 › typed service results and dry run generate a bounded verified change (1.3s)
+  ok 134 [mobile] › browser-tests\sysadmin.spec.js:33:1 › zero results offer recovery and debug diagnostics stay local (707ms)
+  ok 135 [mobile] › browser-tests\ux.spec.js:5:1 › one step stays open while invalid collapsed steps remain visible and reviewable (1.1s)
+  ok 136 [mobile] › browser-tests\ux.spec.js:18:1 › fresh script confirmation can cancel and the footer sits below the workspace (593ms)
+  -  137 [mobile] › browser-tests\ux.spec.js:27:1 › desktop dividers drag, persist and reset without covering panel controls
+  ok 138 [mobile] › browser-tests\ux.spec.js:37:1 › keyboard search adds steps and workspace fits desktop, laptop and phone (540ms)
+
+
+  1) [desktop] › browser-tests\group-behavior.spec.js:41:1 › script dry run wins over group settings and removal needs a live-change review 
+
+    Error: locator.uncheck: Clicking the checkbox did not change its state
+    Call log:
+      - waiting for locator('#dry-run')
+        - locator resolved to <input id="dry-run" type="checkbox"/>
+      - attempting click action
+        - waiting for element to be visible, enabled and stable
+        - element is visible, enabled and stable
+        - scrolling into view if needed
+        - done scrolling
+        - performing click action
+        - click action done
+        - waiting for scheduled navigations to finish
+        - navigations have finished
+
+
+      42 |   await seed(page);await settings(page).click();await page.locator('#group-preset').selectOption('confirmed');await review(page).click();await page.locator('#behavior-live-ack').check();await apply(page).click();
+      43 |   await page.locator('#context-edit').click();await page.locator('#dry-run').check();await page.locator('#close-options').click();await expect(page.locator('[data-param=whatIf]')).toBeChecked();await expect(page.locator('[data-param=whatIf]')).toBeDisabled();await expect(page.locator('[data-behavior-origin=whatIf]')).toContainText('Script-wide dry run');
+    > 44 |   await page.locator('#context-edit').click();await page.locator('#dry-run').uncheck();await expect(apply(page)).toBeDisabled();await page.keyboard.press('Escape');await expect(page.locator('#dry-run')).toBeChecked();await page.locator('#dry-run').uncheck();await page.locator('#behavior-live-ack').check();await apply(page).click();await expect(page.locator('#dry-run')).toBeFocused();await expect(page.locator('#dry-run')).not.toBeChecked();await page.locator('#close-options').click();await expect(page.locator('[data-param=whatIf]')).not.toBeChecked();
+         |                                                                              ^
+      45 |   await page.locator('[data-param=confirm]').uncheck();await expect(apply(page)).toBeDisabled();await expect(page.locator('#behavior-review-content')).toContainText('confirmation override conflicts');await page.locator('#behavior-live-ack').check();await apply(page).click();await expect(page.locator('#context-status')).toHaveText('Needs configuration');await page.locator('[data-reset-behavior=confirm]').click();await apply(page).click();await expect(page.locator('#context-status')).toHaveText('Ready to export');
+      46 | });
+      47 |
+        at C:\Users\matth\Desktop\Shellify\browser-tests\group-behavior.spec.js:44:78
+
+    Error Context: test-results\group-behavior-script-dry--a8bd6--needs-a-live-change-review-desktop\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\group-behavior-script-dry--a8bd6--needs-a-live-change-review-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\group-behavior-script-dry--a8bd6--needs-a-live-change-review-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [mobile] › browser-tests\group-behavior.spec.js:41:1 › script dry run wins over group settings and removal needs a live-change review 
+
+    Error: locator.uncheck: Clicking the checkbox did not change its state
+    Call log:
+      - waiting for locator('#dry-run')
+        - locator resolved to <input id="dry-run" type="checkbox"/>
+      - attempting click action
+        - waiting for element to be visible, enabled and stable
+        - element is visible, enabled and stable
+        - scrolling into view if needed
+        - done scrolling
+        - performing click action
+        - click action done
+        - waiting for scheduled navigations to finish
+        - navigations have finished
+
+
+      42 |   await seed(page);await settings(page).click();await page.locator('#group-preset').selectOption('confirmed');await review(page).click();await page.locator('#behavior-live-ack').check();await apply(page).click();
+      43 |   await page.locator('#context-edit').click();await page.locator('#dry-run').check();await page.locator('#close-options').click();await expect(page.locator('[data-param=whatIf]')).toBeChecked();await expect(page.locator('[data-param=whatIf]')).toBeDisabled();await expect(page.locator('[data-behavior-origin=whatIf]')).toContainText('Script-wide dry run');
+    > 44 |   await page.locator('#context-edit').click();await page.locator('#dry-run').click();await expect(apply(page)).toBeDisabled();await page.keyboard.press('Escape');await expect(page.locator('#dry-run')).toBeChecked();await page.locator('#dry-run').click();await page.locator('#behavior-live-ack').check();await apply(page).click();await expect(page.locator('#dry-run')).toBeFocused();await expect(page.locator('#dry-run')).not.toBeChecked();await page.locator('#close-options').click();await expect(page.locator('[data-param=whatIf]')).not.toBeChecked();
+         |                                                                              ^
+      45 |   await page.locator('[data-param=confirm]').click();await expect(apply(page)).toBeDisabled();await expect(page.locator('#behavior-review-content')).toContainText('confirmation override conflicts');await page.locator('#behavior-live-ack').check();await apply(page).click();await expect(page.locator('#context-status')).toHaveText('Needs configuration');await page.locator('[data-reset-behavior=confirm]').click();await apply(page).click();await expect(page.locator('#context-status')).toHaveText('Ready to export');
+      46 | });
+      47 |
+        at C:\Users\matth\Desktop\Shellify\browser-tests\group-behavior.spec.js:44:78
+
+    Error Context: test-results\group-behavior-script-dry--a8bd6--needs-a-live-change-review-mobile\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\group-behavior-script-dry--a8bd6--needs-a-live-change-review-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\group-behavior-script-dry--a8bd6--needs-a-live-change-review-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [desktop] › browser-tests\group-behavior.spec.js:41:1 › script dry run wins over group settings and removal needs a live-change review 
+    [mobile] › browser-tests\group-behavior.spec.js:41:1 › script dry run wins over group settings and removal needs a live-change review 
+  1 skipped
+  135 passed (4.6m)

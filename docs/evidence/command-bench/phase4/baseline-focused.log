@@ -1,0 +1,29 @@
+✔ documented example imports and unsupported fixture is rejected (9.4085ms)
+✔ editable projects round trip settings, flags, output and collapse with fresh IDs (1.5232ms)
+✔ import rejects invalid and unsupported projects without altering the draft (2.805ms)
+✔ CSV/JSON wrap the entire result pipeline, quote paths, and prevent overwrites (1.1992ms)
+✔ output validation and review catch invalid paths and duplicate destinations (0.5102ms)
+✔ favorites and recents whitelist commands, survive storage and cap recent history (0.4788ms)
+✔ flag and cmdlet search works without accepting unsupported intent (86.4421ms)
+✔ review collects modules, permission notes, targets, modifications and files (0.4113ms)
+✔ new catalog commands constrain queries and quote user values (0.3034ms)
+✔ four first-wave workflows share inputs, retain groups and export in both languages (15.8922ms)
+✔ composition validates type and order, preserves capture and blocks unpreviewable changes (2.3633ms)
+✔ fleet, reports, event errors and typed service starts execute safely with mocks in both runtimes (7146.2552ms)
+✔ pending reboot and scheduled-task snippets preserve empty values and exclusion rules (2477.628ms)
+✔ autosave round trips empty drafts, invalid edits, collapse state and settings (3.2737ms)
+✔ corrupt storage and denied storage recover without losing generation (3.1179ms)
+✔ saved library retains independent scripts and skips unsupported records (0.4731ms)
+✔ undo snapshots survive changes, reset and clear without sharing references (0.25ms)
+✔ workflows generate supported read-only scripts for both PowerShell targets (3.0302ms)
+✔ filenames are safe Windows basenames with one PowerShell extension (0.3418ms)
+✔ version-specific generation and metadata cannot introduce executable code (0.5763ms)
+✔ summary and exported comments distinguish dry runs from modifying steps (0.4093ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9765.5903
